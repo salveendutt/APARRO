@@ -15,6 +15,7 @@
 **Imports:** Import each module on a separate line. Group imports in the following order: standard library imports, third-party library imports, and local application imports.
 
 **Comments and Documentation:** Write docstrings for functions, classes, and modules to provide documentation that can be accessed using tools like Python's built-in help() function. Example is below (Args and Return can be optional as long as they are crystal clear. Otherwise it's better to mention them)
+```python
 def calculate_average(numbers):
     """
     Calculate the average of a list of numbers.
@@ -27,4 +28,4 @@ def calculate_average(numbers):
     """
     total = sum(numbers)
     average = total / len(numbers)
-    return average
+    return average`
