@@ -11,7 +11,7 @@ from time import sleep
 
 from faster_whisper import WhisperModel
 
-audio_model = WhisperModel("medium", device="cuda", compute_type="float16")
+audio_model = WhisperModel("medium.en", device="cuda", compute_type="float16")
 
 def main():
     parser = argparse.ArgumentParser()
