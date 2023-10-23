@@ -8,40 +8,47 @@ from faster_whisper import WhisperModel
 
 COMPUTE_TYPE = "float16"
 
-class MevinWhisper:
+class whisperTest:
     def __init__(self, model_name, device_type):
         self.model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
         self.recording = False
         self.predicted_text = ""
 
-    def start_recording(self):
-        self.recording = True
-        self.predicted_text = ""
+    def capture_audio(self):
+        frames = []
+        audio = pyaudio.PyAudio()
+        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
 
-        def record_audio():
-            frames = []
-            audio = pyaudio.PyAudio()
-            stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+        while self.recording:
+            data = stream.read(1024)
+            frames.append(data)
 
-            while self.recording:
-                data = stream.read(1024)
-                frames.append(data)
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
 
-            stream.stop_stream()
-            stream.close()
-            audio.terminate()
+        return frames
 
-            sound_file = wave.open("recording.wav", "wb")
-            sound_file.setnchannels(1)
-            sound_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-            sound_file.setframerate(44100)
-            sound_file.writeframes(b"".join(frames))
-            sound_file.close()
+    def save_audio(self, frames):
+        sound_file = wave.open("recording.wav", "wb")
+        sound_file.setnchannels(1)
+        sound_file.setsampwidth(pyaudio.PyAudio().get_sample_size(pyaudio.paInt16))
+        sound_file.setframerate(44100)
+        sound_file.writeframes(b"".join(frames))
+        sound_file.close()
+
+    def record_audio(self):
+            frames = self.capture_audio()
+            self.save_audio(frames)
 
             transcription = self.transcribe_audio("recording.wav")
             self.predicted_text = transcription
 
-        recording_thread = threading.Thread(target=record_audio)
+    def start_recording(self):
+        self.recording = True
+        self.predicted_text = "" 
+
+        recording_thread = threading.Thread(target=self.record_audio)
         recording_thread.start()
 
     def stop_recording(self):
@@ -63,7 +70,7 @@ class MevinWhisper:
         return transcription
 
 def main():
-    whisper_instance = MevinWhisper(model_name="medium.en", device_type="cuda")
+    whisper_instance = whisperTest(model_name="medium.en", device_type="cuda")
     
     print("Press 'O' to start recording...\n")
     keyboard.wait("o")
