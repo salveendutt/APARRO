@@ -1,12 +1,12 @@
-import order as od
+import waiter as wt
 
 def main():
-    order = """
+    order_str = """
     I would like to order McCrispy without pickle and 5 large french fries. Change 2 of french 
     fries to 2 Big Mac and add a Coke. Also add one Chicken Biriani.
     """.strip()
-    
-    order = od.take_order(order)
+    waiter = wt.Waiter(order_str)
+    order = waiter.take_order()
     # order = """
     #     {
     #         "dish": "McCrispy",
