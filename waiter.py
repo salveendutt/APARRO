@@ -30,22 +30,14 @@ class Waiter:
     def process_order(self, order: dict):
         confirmed_order = []
         order_not_in_menu = []
-        print()
         for food_item in order:
             dish = food_item["dish"]
-            # fuzzy instead of in
-            if dish in mn.mcdonalds_menu:
-                confirmed_order.append(dish)
+            best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
+            if similarity_score >= 90:
+                confirmed_order.append(best_match)
             else:
                 order_not_in_menu.append(dish)
-        print("Your order is: ", end="")
-        for item in confirmed_order:
-            print(item, end=", ")
-        print()
-        print("Unfortunately we don't have: ", end="")
-        for item in order_not_in_menu:
-            print(item, end=", ")
-        print("\n")
+        return (confirmed_order, order_not_in_menu)
         
     def take_order(self):
         # Stage 1, Creating Prompt for the Model
@@ -60,6 +52,5 @@ class Waiter:
         # Stage 4, Converting from JSON to dictionary
         dict_order = self.json_to_dict(json_order)
         # Stage 5, Processing the Order
-        self.process_order(dict_order)
-        # return dict_order
-        return None 
+        ordered, ordered_not_in_menu = self.process_order(dict_order)
+        return (ordered, ordered_not_in_menu) 

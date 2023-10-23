@@ -1,6 +1,8 @@
 mcdonalds_menu = {
     "McChicken",
+    "Mac Chicken",
     "McCrispy",
+    "Mac Crispy",
     "Big Mac",
     "Coke",
     "Quarter Pounder with Cheese",
