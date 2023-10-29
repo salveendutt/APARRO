@@ -1,5 +1,11 @@
 import waiter as wt
+def print_order(ordered, unavailable):
+    ordered_str = ", ".join(ordered)
+    unavailable_str = ", ".join(unavailable)
 
+    print(f"Your order is: {ordered_str}")
+    print(f"Unfortunately we don't have: {unavailable_str}\n")
+    
 def mainB():
     backup_order = """
     {
@@ -30,14 +36,7 @@ def mainB():
     waiter = wt.Waiter("")
     dict_order = waiter.json_to_dict(backup_order)
     ordered, unavailable = waiter.process_order(dict_order)
-    print("Your order is: ", end="")
-    for item in ordered:
-            print(item, end=", ")
-    print()
-    print("Unfortunately we don't have: ", end="")
-    for item in unavailable:
-        print(item, end=", ")
-    print("\n")
+    print_order(ordered, unavailable)
 
 def main():
     order_str = """
@@ -46,16 +45,9 @@ def main():
     """.strip()
     waiter = wt.Waiter(order_str)
     ordered, unavailable = waiter.take_order()
-    print("Your order is: ", end="")
-    for item in ordered:
-            print(item, end=", ")
-    print()
-    print("Unfortunately we don't have: ", end="")
-    for item in unavailable:
-        print(item, end=", ")
-    print("\n")
+    print_order(ordered, unavailable)
 
 
 if __name__ == "__main__":
-    main()
-    # mainB()
+    # main()
+    mainB()
