@@ -1,48 +1,43 @@
-import os
-import wave
-import time
-import keyboard
-import threading
 import pyaudio
+import threading
+import keyboard
 from faster_whisper import WhisperModel
+import io
+import numpy as np
+import soundfile as sf
 
 COMPUTE_TYPE = "float16"
 
-class whisperTest:
+class Transcriber:
     def __init__(self, model_name, device_type):
         self.model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
         self.recording = False
         self.predicted_text = ""
+        self.frames = []
+        self.transcription_done = threading.Event()
 
     def capture_audio(self):
-        frames = []
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
 
         while self.recording:
-            data = stream.read(1024)
-            frames.append(data)
+            data = stream.read(256)
+            self.frames.append(np.frombuffer(data, dtype=np.int16))
 
         stream.stop_stream()
         stream.close()
         audio.terminate()
 
-        return frames
-
-    def save_audio(self, frames):
-        sound_file = wave.open("recording.wav", "wb")
-        sound_file.setnchannels(1)
-        sound_file.setsampwidth(pyaudio.PyAudio().get_sample_size(pyaudio.paInt16))
-        sound_file.setframerate(44100)
-        sound_file.writeframes(b"".join(frames))
-        sound_file.close()
-
     def record_audio(self):
-            frames = self.capture_audio()
-            self.save_audio(frames)
-
-            transcription = self.transcribe_audio("recording.wav")
-            self.predicted_text = transcription
+        self.frames = []
+        self.capture_audio()
+        audio_data = np.concatenate(self.frames, axis=0)
+        audio_buffer = io.BytesIO()
+        sf.write(audio_buffer, audio_data, 16000, format='wav')
+        audio_buffer.seek(0)
+        transcription = self.transcribe_audio(audio_buffer)
+        self.predicted_text = transcription
+        self.transcription_done.set()
 
     def start_recording(self):
         self.recording = True
@@ -55,22 +50,17 @@ class whisperTest:
         self.recording = False
 
     def get_predicted_text(self):
+        self.transcription_done.wait() 
         return self.predicted_text
     
-    def delete_audio(self):
-        try:
-            os.remove("recording.wav")
-        except FileNotFoundError:
-            print("Recording file not found.")
-
-    def transcribe_audio(self, audio_file):
-        segments, _ = self.model.transcribe(audio_file)
+    def transcribe_audio(self, audio_buffer):
+        segments, _ = self.model.transcribe(audio_buffer)
         segments = list(segments)
         transcription = " ".join([segment.text for segment in segments])
         return transcription
 
 def main():
-    whisper_instance = whisperTest(model_name="medium.en", device_type="cuda")
+    whisper_instance = Transcriber(model_name="medium.en", device_type="cuda")
     
     print("Press 'O' to start recording...\n")
     keyboard.wait("o")
@@ -81,14 +71,12 @@ def main():
     keyboard.wait("o")
 
     whisper_instance.stop_recording()
-    
 
-    time.sleep(3)
+    print("Recording Complete. Transcribing...\n")
 
 
     text = whisper_instance.get_predicted_text()
     print("Predicted Text:", text)
 
-    whisper_instance.delete_audio()
 if __name__ == "__main__":
     main()
