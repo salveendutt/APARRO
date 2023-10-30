@@ -1,4 +1,7 @@
 import waiter as wt
+import transcriber as tr
+import keyboard
+
 def print_order(ordered, unavailable):
     ordered_str = ", ".join(ordered)
     unavailable_str = ", ".join(unavailable)
@@ -38,6 +41,18 @@ def mainB():
     ordered, unavailable = waiter.process_order(dict_order)
     print_order(ordered, unavailable)
 
+def mainC():
+    whisper_instance = tr(model_name="medium.en", device_type="cuda")
+    print("Press 'O' to start recording...\n")
+    keyboard.wait("o")
+    whisper_instance.start_recording()
+    print("Recording... Press 'O' again to stop recording.\n")
+    keyboard.wait("o")
+    whisper_instance.stop_recording()
+    print("Recording Complete. Transcribing...\n")
+    text = whisper_instance.get_predicted_text()
+    print("Predicted Text:", text)
+
 def main():
     order_str = """
     I would like to order McCrispy without pickle and 5 large french fries. Change 2 of french 
@@ -51,3 +66,4 @@ def main():
 if __name__ == "__main__":
     # main()
     mainB()
+    # mainC()
