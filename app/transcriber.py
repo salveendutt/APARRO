@@ -19,11 +19,9 @@ class Transcriber:
     def capture_audio(self):
         audio = pyaudio.PyAudio()
         stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
-
         while self.recording:
             data = stream.read(256)
             self.frames.append(np.frombuffer(data, dtype=np.int16))
-
         stream.stop_stream()
         stream.close()
         audio.terminate()
@@ -59,24 +57,3 @@ class Transcriber:
         transcription = " ".join([segment.text for segment in segments])
         return transcription
 
-def main():
-    whisper_instance = Transcriber(model_name="medium.en", device_type="cuda")
-    
-    print("Press 'O' to start recording...\n")
-    keyboard.wait("o")
-    
-    whisper_instance.start_recording()
-    
-    print("Recording... Press 'O' again to stop recording.\n")
-    keyboard.wait("o")
-
-    whisper_instance.stop_recording()
-
-    print("Recording Complete. Transcribing...\n")
-
-
-    text = whisper_instance.get_predicted_text()
-    print("Predicted Text:", text)
-
-if __name__ == "__main__":
-    main()
