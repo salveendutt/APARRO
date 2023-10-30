@@ -27,6 +27,7 @@ class Waiter:
         json_dict = json.loads(json_str)
         return json_dict
 
+    # TODO 53. here we specify dish, but it should be have EVERYTHING
     def process_order(self, order: dict):
         confirmed_order = []
         order_not_in_menu = []
