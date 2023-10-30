@@ -40,7 +40,6 @@ class Transcriber:
     def start_recording(self):
         self.recording = True
         self.predicted_text = "" 
-
         recording_thread = threading.Thread(target=self.record_audio)
         recording_thread.start()
 

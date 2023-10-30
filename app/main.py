@@ -43,23 +43,15 @@ def mainB():
 
 def mainC():
     whisper_instance = tr(model_name="medium.en", device_type="cuda")
-    
     print("Press 'O' to start recording...\n")
     keyboard.wait("o")
-    
     whisper_instance.start_recording()
-    
     print("Recording... Press 'O' again to stop recording.\n")
     keyboard.wait("o")
-
     whisper_instance.stop_recording()
-
     print("Recording Complete. Transcribing...\n")
-
-
     text = whisper_instance.get_predicted_text()
     print("Predicted Text:", text)
-
 
 def main():
     order_str = """
