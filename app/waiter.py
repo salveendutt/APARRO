@@ -3,15 +3,12 @@ import menu as mn
 from ctransformers import AutoModelForCausalLM
 from thefuzz import fuzz, process
 
-class Waiter:
-    def __init__(self, order: str):
-        self.order = order
-        
-    def create_prompt(self):
+class Waiter: 
+    def create_prompt(self, order: str):
         prompt = f"""
         Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, \
         and write it down in JSON format with the following keys: dish, quantity, comment.
-        ```{self.order}```
+        ```{order}```
         JSON:
         """.strip()
         return prompt
@@ -27,6 +24,7 @@ class Waiter:
         json_dict = json.loads(json_str)
         return json_dict
 
+    # TODO this function should return all the info about the order using future order class
     def process_order(self, order: dict):
         confirmed_order = []
         order_not_in_menu = []
@@ -39,9 +37,9 @@ class Waiter:
                 order_not_in_menu.append(dish)
         return (confirmed_order, order_not_in_menu)
         
-    def take_order(self):
+    def create_order(self, order: str):
         # Stage 1, Creating Prompt for the Model
-        prompt = self.create_prompt()
+        prompt = self.create_prompt(order)
         print(prompt)
         # Stage 2, Preparing model
         llm = self.initialize_model()

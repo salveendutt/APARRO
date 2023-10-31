@@ -1,6 +1,5 @@
 import pyaudio
 import threading
-import keyboard
 from faster_whisper import WhisperModel
 import io
 import numpy as np
@@ -56,3 +55,20 @@ class Transcriber:
         transcription = " ".join([segment.text for segment in segments])
         return transcription
 
+    def transcribe(self):
+        """
+        Perform audio recording and transcription.
+
+        This method handles the entire process of recording audio, stopping recording,
+        and transcribing the recorded audio.
+
+        Returns:
+        str: The transcribed text.
+        """
+        self.start_recording()
+        input("Press Enter to start recording...")
+        self.start_recording()
+        input("Recording... Press Enter again to stop recording.")
+        self.stop_recording()
+        print("Recording Complete. Transcribing...\n")
+        return self.get_predicted_text()

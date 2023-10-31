@@ -42,17 +42,10 @@ def mainB():
     print_order(ordered, unavailable)
 
 def mainC():
-    whisper_instance = tr(model_name="medium.en", device_type="cuda")
-    print("Press 'O' to start recording...\n")
-    keyboard.wait("o")
-    whisper_instance.start_recording()
-    print("Recording... Press 'O' again to stop recording.\n")
-    keyboard.wait("o")
-    whisper_instance.stop_recording()
-    print("Recording Complete. Transcribing...\n")
-    text = whisper_instance.get_predicted_text()
-    print("Predicted Text:", text)
-
+    transcriber = tr.Transcriber(model_name="medium.en", device_type="cuda")
+    order = transcriber.transcribe()
+    print(order)
+    
 def main():
     order_str = """
     I would like to order McCrispy without pickle and 5 large french fries. Change 2 of french 
@@ -65,5 +58,5 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    mainB()
-    # mainC()
+    # mainB()
+    mainC()
