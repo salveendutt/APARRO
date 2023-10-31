@@ -7,6 +7,8 @@ import soundfile as sf
 
 COMPUTE_TYPE = "float16"
 
+# Whisper is able to handle up to 30 seconds, so we need to cut the string 
+# after some period of time the same way as in live transcibe
 class Transcriber:
     def __init__(self, model_name, device_type):
         """

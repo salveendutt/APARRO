@@ -15,7 +15,8 @@ class TestTranscriber(unittest.TestCase):
     def tearDown(self):
         pass
 
-    # TODO need to load from wav/flac file bytes and then using these bytes make a test 
+    # TODO need to load from wav/flac file bytes and then using these bytes make a test
+    # from https://github.com/openai/whisper/tree/main/tests 
     # def test_transcribe_audio(self):
     #     audio_data = b'\x00\x01\x02\x03'
     #     audio_buffer = io.BytesIO(audio_data)
