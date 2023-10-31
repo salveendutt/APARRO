@@ -75,7 +75,7 @@ class Transcriber:
         """
         self.recording = False
 
-    def get_predicted_text(self):
+    def get_predicted_text(self) -> str:
         """
         Waits for transcription to complete and returns the predicted text.
 
@@ -85,7 +85,7 @@ class Transcriber:
         self.transcription_done.wait()
         return self.predicted_text
 
-    def transcribe_audio(self, audio_buffer):
+    def transcribe_audio(self, audio_buffer) -> str:
         """
         Transcribes audio data from the provided audio buffer.
 

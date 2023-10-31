@@ -1,9 +1,14 @@
 import restaurant as rst
+# TODO: device_type = "cuda" if torch.cuda.is_available() else "cpu"
+# If we use cpu, then float16 returns error, hence let's fix it.
+DEVICE_TYPE = "cuda"
+# DEVICE_TYPE = "cpu"
+MODEL_NAME = "medium.en"
 
 def main():
     restaurant = (
         rst.Restaurant.Builder()
-        .with_transcriber(model_name="medium.en", device_type="cuda")
+        .with_transcriber(model_name=MODEL_NAME, device_type=DEVICE_TYPE)
         .with_waiter()
         .build()
     )
