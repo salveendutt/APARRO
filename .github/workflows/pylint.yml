@@ -22,4 +22,5 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        cd app  # Change the working directory to the "app" folder
+        pylint --rcfile=pylint.config $(git ls-files '*.py')
