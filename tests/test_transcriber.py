@@ -25,7 +25,6 @@ class TestTranscriber(unittest.TestCase):
     def test_start_recording_and_stop_recording(self):
         self.transcriber.start_recording()
         self.assertTrue(self.transcriber.recording)
-
         self.transcriber.stop_recording()
         self.assertFalse(self.transcriber.recording)
 

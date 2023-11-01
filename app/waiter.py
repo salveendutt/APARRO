@@ -1,7 +1,7 @@
 import json
 import menu as mn
 from ctransformers import AutoModelForCausalLM
-from thefuzz import fuzz, process
+from thefuzz import process
 
 class Waiter:
     def create_prompt(self, order: str):
