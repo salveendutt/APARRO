@@ -7,8 +7,8 @@ import soundfile as sf
 
 COMPUTE_TYPE = "float16"
 
-# Whisper is able to handle up to 30 seconds, so we need to cut the string 
-# after some period of time the same way as in live transcibe
+# Whisper is able to handle only up to 30 seconds, so we need to cut the string 
+# after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
 class Transcriber:
     def __init__(self, model_name, device_type):
         """
@@ -52,6 +52,10 @@ class Transcriber:
         self.frames = []
         try:
             self.capture_audio()
+            if len(self.frames) == 0:
+                self.predicted_text = "No audio data captured."
+                self.transcription_done.set()
+                return
             audio_data = np.concatenate(self.frames, axis=0)
             audio_buffer = io.BytesIO()
             sf.write(audio_buffer, audio_data, 16000, format='wav')
