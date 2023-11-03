@@ -4,7 +4,7 @@ from faster_whisper import WhisperModel
 import io
 import numpy as np
 import soundfile as sf
-
+# TODO Mevin Add whisper jax in a separate file for now
 COMPUTE_TYPE = "float16"
 
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string 

@@ -45,7 +45,7 @@ def main_transcribe():
     transcriber = tr.Transcriber(model_name="medium.en", device_type="cuda")
     order = transcriber.transcribe()
     print(order)
-    
+
 def main_predict_order():
     order_str = """
     I would like to order McCrispy without pickle and 5 large french fries. Change 2 of french 

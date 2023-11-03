@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 import sys
 import os
-# TODO Fix the path. Right now it gives warning, but something has to be done in order
+# TODO Mevin Fix the path. Right now it gives warning, but something has to be done in order
 # for it to not show warning
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app'))
 sys.path.append(app_dir)
