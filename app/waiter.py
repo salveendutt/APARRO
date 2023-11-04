@@ -3,7 +3,15 @@ import menu as mn
 from ctransformers import AutoModelForCausalLM
 from thefuzz import process
 
+MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
+MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
+MODEL_TYPE = "mistral"
+
 class Waiter:
+    def __init__(self):
+        self.ordered = []
+        self.unavailable = []
+        
     def create_prompt(self, order: str):
         """
         Creates a prompt for the model to process a customer's order.
@@ -18,10 +26,10 @@ class Waiter:
         Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, and write it down in JSON format with the following keys: dish, quantity, comment.
         ```{order}```
         JSON:
-        """.strip()
+        """
         return prompt
 
-    def initialize_model(self):
+    def initialize_model(self, model_path_or_repo_id, model_file, model_type):
         """
         Initializes an LLM from AutoModelForCausalLM.
 
@@ -29,9 +37,9 @@ class Waiter:
         AutoModelForCausalLM: The initialized large language model.
         """
         try:
-            return AutoModelForCausalLM.from_pretrained("TheBloke/Mistral-7B-Instruct-v0.1-GGUF",
-                                                        model_file="mistral-7b-instruct-v0.1.Q5_K_M.gguf",
-                                                        model_type="mistral")
+            return AutoModelForCausalLM.from_pretrained(model_path_or_repo_id,
+                                                        model_file=model_file,
+                                                        model_type=model_type)
         except Exception as e:
             raise Exception("Error initializing the model: " + str(e))
 
@@ -62,19 +70,23 @@ class Waiter:
         Args:
         order (dict): The customer's order as a dictionary.
 
-        Returns:
-        tuple: A tuple containing two lists - confirmed_order and order_not_in_menu.
+        Updates:
+        self.ordered (list of dictionaries): List of dictionaries containing keys as "dish", "quantity", and "comment".
+        self.unavailable (list of dishes): List of dishes (names) not found in the menu.
         """
-        confirmed_order = []
-        order_not_in_menu = []
         for food_item in order:
             dish = food_item["dish"]
+            quantity = food_item["quantity"]
+            comment = food_item["comment"]
+            # Using fuzziness to find the most similar item on the menu
             best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
+            # Make sure this item does belong in the menu, if similarity is below 90 - it is not in menu
             if similarity_score >= 90:
-                confirmed_order.append(best_match)
+                confirmed_item = {"dish": best_match, "comment": comment, "quantity": quantity}
+                self.ordered.append(confirmed_item)
             else:
-                order_not_in_menu.append(dish)
-        return (confirmed_order, order_not_in_menu)
+                self.unavailable.append(dish)
+        return
 
     def create_order(self, order: str):
         """
@@ -86,21 +98,45 @@ class Waiter:
         Returns:
         tuple: A tuple containing two lists - ordered and ordered_not_in_menu.
         """
-        try:
-            # Stage 1, Creating Prompt for the Model
-            prompt = self.create_prompt(order)
-            print(prompt)
-            # Stage 2, Preparing model
-            llm = self.initialize_model()
-            # Stage 3, Running the model
-            print("Predicting...")
-            json_order = llm(prompt, max_new_tokens=2048, temperature=0.0, top_k=55, top_p=0.9, repetition_penalty=1.2)
-            print("model output:" + json_order)
-            # Stage 4, Converting from JSON to dictionary
-            dict_order = self.json_to_dict(json_order)
-            # Stage 5, Processing the Order
-            ordered, ordered_not_in_menu = self.process_order(dict_order)  # You need to implement process_order
-            return (ordered, ordered_not_in_menu)
-        except Exception as e:
-            raise Exception("Error processing order: " + str(e))
+        # Stage 1, Creating Prompt for the Model
+        prompt = self.create_prompt(order)
+        print(prompt)
+        # Stage 2, Preparing model
+        llm = self.initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
+        # Stage 3, Running the model
+        print("Predicting...")
+        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0, top_k=55, top_p=0.9, repetition_penalty=1.2)
+        print(f"Model output: {json_order}")
+        # Stage 4, Converting from JSON to dictionary
+        dict_order = self.json_to_dict(json_order)
+        # Stage 5, Processing the Order
+        self.process_order(dict_order)
+        
+    def print_order(self):
+        """
+        Prints the ordered items and unavailable items in a formatted manner.
+
+        Args:
+        ordered (list): List of ordered items (as dictionaries with keys "dish", "comment", and "quantity").
+        unavailable (list): List of unavailable items.
+        """
+        ordered_items = []
+        unavailable_items = self.unavailable
+        
+        for item in self.ordered:
+            ordered_item_str = f"{item['quantity']} {item['dish']}"
+            if item['comment']:
+                ordered_item_str += f" ({item['comment']})"
+            ordered_items.append(ordered_item_str)
+
+        ordered_str = ", ".join(ordered_items)
+        unavailable_str = ", ".join(self.unavailable)
+
+        if ordered_items:
+            print(f"Your order is: {ordered_str}")
+        else:
+            print("Sorry, there is nothing in our menu which you ordered")
+
+        if unavailable_items:
+            print(f"Unfortunately we don't have: {unavailable_str}\n")
 

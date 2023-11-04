@@ -1,13 +1,5 @@
-
 import waiter as wt
 import transcriber as tr
-
-def print_order(ordered, unavailable):
-    ordered_str = ", ".join(ordered)
-    unavailable_str = ", ".join(unavailable)
-
-    print(f"Your order is: {ordered_str}")
-    print(f"Unfortunately we don't have: {unavailable_str}\n")
     
 def main_output_demo():
     backup_order = """
@@ -36,10 +28,10 @@ def main_output_demo():
         "quantity": 1,
         "comment": ""
     }"""
-    waiter = wt.Waiter("")
+    waiter = wt.Waiter()
     dict_order = waiter.json_to_dict(backup_order)
-    ordered, unavailable = waiter.process_order(dict_order)
-    print_order(ordered, unavailable)
+    waiter.process_order(dict_order)
+    waiter.print_order()
 
 def main_transcribe():
     transcriber = tr.Transcriber(model_name="medium.en", device_type="cuda")
@@ -52,10 +44,11 @@ def main_predict_order():
     fries to 2 Big Mac and add a Coke. Also add one Chicken Biriani.
     """.strip()
     waiter = wt.Waiter()
-    ordered, unavailable = waiter.create_order(order_str)
-    print_order(ordered, unavailable)
+    waiter.create_order(order_str)
+    waiter.print_order()
 
 
 if __name__ == "__main__":
-    main_transcribe()
-    # main_predict_order()
+    # main_transcribe()
+    main_predict_order()
+    # main_output_demo()
