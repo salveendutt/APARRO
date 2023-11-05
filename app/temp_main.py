@@ -5,7 +5,7 @@ It includes demonstrations of order transcription, order prediction, and direct 
 
 import waiter as wt
 import transcriber as tr
-    
+
 def main_output_demo():
     """
     Demonstrates the processing of a backup order in JSON format.

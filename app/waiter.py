@@ -12,7 +12,7 @@ from thefuzz import process
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
- 
+
 class Waiter:
     """
     The Waiter class processes customer orders by interpreting them with a language model
@@ -21,7 +21,7 @@ class Waiter:
     def __init__(self):
         self._ordered = []
         self._unavailable = []
-    
+
     def _process_order(self, order: dict):
         """
         Processes a customer's order, confirming items and identifying those not on the menu.
@@ -30,7 +30,8 @@ class Waiter:
         order (dict): The customer's order as a dictionary.
 
         Updates:
-        self._ordered (list of dictionaries): List of dictionaries containing keys as "dish", "quantity", and "comment".
+        self._ordered (list of dictionaries): List of dictionaries 
+        containing keys as "dish", "quantity", and "comment".
         self._unavailable (list of dishes): List of dishes (names) not found in the menu.
         """
         for food_item in order:
@@ -39,7 +40,8 @@ class Waiter:
             comment = food_item["comment"]
             # Using fuzziness to find the most similar item on the menu
             best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
-            # Make sure this item does belong in the menu, if similarity is below 90 - it is not in menu
+            # Make sure this item does belong in the menu,
+            # if similarity is below 90 - it is not in menu
             if similarity_score >= 90:
                 confirmed_item = {"dish": best_match, "comment": comment, "quantity": quantity}
                 self._ordered.append(confirmed_item)
@@ -63,19 +65,21 @@ class Waiter:
         llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
         # Stage 3, Running the model
         print("Predicting...")
-        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0, top_k=55, top_p=0.9, repetition_penalty=1.2)
+        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0, 
+                         top_k=55, top_p=0.9, repetition_penalty=1.2)
         print(f"Model output: {json_order}")
         # Stage 4, Converting from JSON to dictionary
         dict_order = json_to_dict(json_order)
         # Stage 5, Processing the Order
         self._process_order(dict_order)
-        
+    
     def print_order(self):
         """
         Prints the ordered items and unavailable items in a formatted manner.
 
         Args:
-        ordered (list): List of ordered items (as dictionaries with keys "dish", "comment", and "quantity").
+        ordered (list): List of ordered items (as dictionaries 
+        with keys "dish", "comment", and "quantity").
         unavailable (list): List of unavailable items.
         """
         ordered_items = []

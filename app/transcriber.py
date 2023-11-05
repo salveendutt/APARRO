@@ -10,7 +10,7 @@ import soundfile as sf
 from faster_whisper import WhisperModel
 
 COMPUTE_TYPE = "float16"
-# Whisper is able to handle only up to 30 seconds, so we need to cut the string 
+# Whisper is able to handle only up to 30 seconds, so we need to cut the string
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
 class Transcriber:
     def __init__(self, model_name: str, device_type: str):
@@ -36,7 +36,8 @@ class Transcriber:
         Captures audio from the microphone and stores it in frames.
         """
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+        stream = audio.open(format=pyaudio.paInt16, channels=1, 
+                            rate=16000, input=True, frames_per_buffer=1024)
         try:
             while self._is_recording:
                 data = stream.read(256)

@@ -98,5 +98,4 @@ mcdonalds_menu = {
     "Baked Apple Pie",
     "Soft Baked Chocolate Chip Cookie",
     "Soft Baked Oatmeal Raisin Cookie"
-
 }

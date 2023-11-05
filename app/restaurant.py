@@ -1,6 +1,7 @@
 """
 This module contains the Restaurant and RestaurantBuilder classes.
-The Restaurant class is used to take customer orders through a transcriber and process them with a waiter.
+The Restaurant class is used to take customer orders through a transcriber 
+and process them with a waiter.
 The RestaurantBuilder class provides a fluent interface to construct a Restaurant instance.
 """
 

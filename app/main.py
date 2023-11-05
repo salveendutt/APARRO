@@ -13,7 +13,7 @@ MODEL_NAME = "medium.en"
 def main():
     """Set up the restaurant and start taking orders."""
     restaurant = (
-        rst.Restaurant.Builder()
+        rst.Restaurant.builder()
         .with_transcriber(model_name=MODEL_NAME, device_type=DEVICE_TYPE)
         .with_waiter()
         .build()
