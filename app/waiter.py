@@ -89,6 +89,7 @@ class Waiter:
         if unavailable_items:
             print(f"Unfortunately we don't have: {unavailable_str}\n")
 
+
 def create_prompt(order: str):
     """
     Creates a prompt for the model to process a customer's order.
@@ -135,6 +136,7 @@ def create_old_prompt(order: str):
     JSON:
     """
     return prompt
+
 def initialize_model(model_path_or_repo_id, model_file, model_type):
     """
     Initializes an LLM from AutoModelForCausalLM.
@@ -148,7 +150,6 @@ def initialize_model(model_path_or_repo_id, model_file, model_type):
                                                     model_type=model_type)
     except Exception as e:
         raise Exception("Error initializing the model: " + str(e))
-
 
 def json_to_dict(json_str: str):
     """
