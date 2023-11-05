@@ -1,9 +1,14 @@
-import pyaudio
-import threading
-from faster_whisper import WhisperModel
+"""
+This module contains the Transcriber class for transcribing audio input using the Whisper model.
+"""
+
 import io
+import threading
 import numpy as np
+import pyaudio
 import soundfile as sf
+from faster_whisper import WhisperModel
+
 COMPUTE_TYPE = "float16"
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string 
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?

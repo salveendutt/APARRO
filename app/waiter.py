@@ -1,3 +1,9 @@
+"""
+This module contains the Waiter class which is responsible for processing customer orders.
+It uses a language model to interpret the orders and matches them against a menu.
+"""
+
+import textwrap
 import json
 import menu as mn
 from ctransformers import AutoModelForCausalLM
@@ -8,10 +14,14 @@ MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
  
 class Waiter:
+    """
+    The Waiter class processes customer orders by interpreting them with a language model
+    and matching them against a known menu. It handles both available and unavailable items.
+    """
     def __init__(self):
         self._ordered = []
         self._unavailable = []
-        
+    
     def _process_order(self, order: dict):
         """
         Processes a customer's order, confirming items and identifying those not on the menu.
@@ -35,7 +45,6 @@ class Waiter:
                 self._ordered.append(confirmed_item)
             else:
                 self._unavailable.append(dish)
-        return
 
     def create_order(self, order: str):
         """
@@ -100,7 +109,7 @@ def create_prompt(order: str):
     Returns:
     str: The prompt for the model including the order.
     """
-    prompt = f"""
+    prompt = textwrap.dedent(f"""
     Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
     Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
     1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately.
@@ -117,8 +126,8 @@ def create_prompt(order: str):
     Now please find the order below inside backtics and return order in the proper JSON format
     ```{order}```
     JSON:
-    """
-    return prompt
+    """)
+    return prompt.strip()
 
 def create_old_prompt(order: str):
     """

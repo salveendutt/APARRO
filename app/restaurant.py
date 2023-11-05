@@ -1,10 +1,31 @@
+"""
+This module contains the Restaurant and RestaurantBuilder classes.
+The Restaurant class is used to take customer orders through a transcriber and process them with a waiter.
+The RestaurantBuilder class provides a fluent interface to construct a Restaurant instance.
+"""
+
 import waiter as wt
 import transcriber as tr
 
 class Restaurant:
+    """
+    The Restaurant class encapsulates the process of taking and processing customer orders.
+    """
     def __init__(self):
         self._waiter = None
         self._transcriber = None
+
+    def set_waiter(self, waiter):
+        """
+        Sets the waiter for the restaurant.
+        """
+        self._waiter = waiter
+
+    def set_transcriber(self, transcriber):
+        """
+        Sets the transcriber for the restaurant.
+        """
+        self._transcriber = transcriber
 
     def take_order(self):
         """
@@ -22,7 +43,7 @@ class Restaurant:
         self._waiter.print_order()
 
     @staticmethod
-    def Builder():
+    def builder():
         """
         Static factory method to create a new RestaurantBuilder instance.
 
@@ -32,6 +53,9 @@ class Restaurant:
         return RestaurantBuilder()
 
 class RestaurantBuilder:
+    """
+    The RestaurantBuilder class provides methods to configure and build a Restaurant instance.
+    """
     def __init__(self):
         self._restaurant = Restaurant()
 
@@ -42,7 +66,8 @@ class RestaurantBuilder:
         Returns:
         RestaurantBuilder: The current RestaurantBuilder instance with waiter.
         """
-        self._restaurant._waiter = wt.Waiter()
+        waiter = wt.Waiter()
+        self._restaurant.set_waiter(waiter)
         return self
 
     def with_transcriber(self, model_name: str, device_type: str) -> 'RestaurantBuilder':
@@ -56,7 +81,8 @@ class RestaurantBuilder:
         Returns:
         RestaurantBuilder: The current RestaurantBuilder instance with transcriber.
         """
-        self._restaurant._transcriber = tr.Transcriber(model_name, device_type)
+        transcriber = tr.Transcriber(model_name, device_type)
+        self._restaurant.set_transcriber(transcriber)
         return self
 
     def build(self) -> 'Restaurant':
