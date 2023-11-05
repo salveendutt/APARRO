@@ -5,7 +5,8 @@ import os
 # TODO Mevin Fix the path. Right now it gives warning, but something has to be done in order
 # for it to not show warning
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app'))
-sys.path.append(app_dir)
+if app_dir not in sys.path:
+    sys.path.append(app_dir)
 import waiter as wt
 
 
