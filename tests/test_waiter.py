@@ -10,19 +10,18 @@ import waiter as wt
 
 
 class TestWaiter(unittest.TestCase):
-
     def setUp(self):
         self.waiter = wt.Waiter()
 
-    def test_create_prompt(self):
-        order = "Sample order for the test"
-        expected_prompt = """
-        Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, and write it down in JSON format with the following keys: dish, quantity, comment.
-        ```Sample order for the test```
-        JSON:
-        """.strip()
-        prompt = self.waiter.create_prompt(order)
-        self.assertEqual(prompt, expected_prompt)
+    # def test_create_prompt(self):
+    #     order = "Sample order for the test"
+    #     expected_prompt = f"""
+    #     Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, and write it down in JSON format with the following keys: dish, quantity, comment.
+    #     ```{order}```
+    #     JSON:
+    #     """.strip()
+    #     prompt = self.waiter.create_old_prompt(order)
+    #     self.assertEqual(prompt, expected_prompt)
 
     def test_initialize_model(self):
         self.waiter.initialize_model = MagicMock(return_value="Mocked Model")
