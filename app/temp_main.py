@@ -42,13 +42,13 @@ def main_predict_order():
     order_str = """
     I would like to order McCrispy without pickle and 5 large french fries. Change 2 of french 
     fries to 2 Big Mac and add a Coke. Also add one Chicken Biriani.
-    """.strip()
+    """
     waiter = wt.Waiter()
     waiter.create_order(order_str)
     waiter.print_order()
 
 
 if __name__ == "__main__":
-    # main_transcribe()
-    main_predict_order()
+    main_transcribe()
+    # main_predict_order()
     # main_output_demo()

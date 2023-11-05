@@ -4,13 +4,11 @@ from faster_whisper import WhisperModel
 import io
 import numpy as np
 import soundfile as sf
-# TODO Mevin Add whisper jax in a separate file for now
 COMPUTE_TYPE = "float16"
-
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string 
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
 class Transcriber:
-    def __init__(self, model_name, device_type):
+    def __init__(self, model_name: str, device_type: str):
         """
         Initializes the Transcriber with a Whisper model and settings.
 
@@ -19,25 +17,25 @@ class Transcriber:
         device_type (str): Type of device to use for the Whisper model.
         """
         try:
-            self.model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
+            self._model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
         except Exception as e:
             raise Exception("Error initializing WhisperModel: " + str(e))
 
-        self.recording = False
-        self.predicted_text = ""
-        self.frames = []
-        self.transcription_done = threading.Event()
+        self._is_recording = False
+        self._predicted_text = ""
+        self._frames = []
+        self._transcription_done = threading.Event()
 
-    def capture_audio(self):
+    def _capture_audio(self):
         """
         Captures audio from the microphone and stores it in frames.
         """
         audio = pyaudio.PyAudio()
         stream = audio.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
         try:
-            while self.recording:
+            while self._is_recording:
                 data = stream.read(256)
-                self.frames.append(np.frombuffer(data, dtype=np.int16))
+                self._frames.append(np.frombuffer(data, dtype=np.int16))
         except Exception as e:
             raise Exception("Error capturing audio: " + str(e))
         finally:
@@ -45,53 +43,53 @@ class Transcriber:
             stream.close()
             audio.terminate()
 
-    def record_audio(self):
+    def _record_audio(self):
         """
         Records audio, processes it, and transcribes it into text.
         """
-        self.frames = []
+        self._frames = []
         try:
-            self.capture_audio()
-            if len(self.frames) == 0:
-                self.predicted_text = "No audio data captured."
-                self.transcription_done.set()
+            self._capture_audio()
+            if len(self._frames) == 0:
+                self._predicted_text = "No audio data captured."
+                self._transcription_done.set()
                 return
-            audio_data = np.concatenate(self.frames, axis=0)
+            audio_data = np.concatenate(self._frames, axis=0)
             audio_buffer = io.BytesIO()
             sf.write(audio_buffer, audio_data, 16000, format='wav')
             audio_buffer.seek(0)
-            transcription = self.transcribe_audio(audio_buffer)
-            self.predicted_text = transcription
-            self.transcription_done.set()
+            transcription = self._transcribe_audio(audio_buffer)
+            self._predicted_text = transcription
+            self._transcription_done.set()
         except Exception as e:
             raise Exception("Error recording and transcribing audio: " + str(e))
 
-    def start_recording(self):
+    def _start_recording(self):
         """
         Starts the audio recording process.
         """
-        self.recording = True
-        self.predicted_text = ""
-        recording_thread = threading.Thread(target=self.record_audio)
+        self._is_recording = True
+        self._predicted_text = ""
+        recording_thread = threading.Thread(target=self._record_audio)
         recording_thread.start()
 
-    def stop_recording(self):
+    def _stop_recording(self):
         """
         Stops the audio recording process.
         """
-        self.recording = False
+        self._is_recording = False
 
-    def get_predicted_text(self) -> str:
+    def _get_predicted_text(self) -> str:
         """
         Waits for transcription to complete and returns the predicted text.
 
         Returns:
         str: The transcribed text.
         """
-        self.transcription_done.wait()
-        return self.predicted_text
+        self._transcription_done.wait()
+        return self._predicted_text
 
-    def transcribe_audio(self, audio_buffer) -> str:
+    def _transcribe_audio(self, audio_buffer) -> str:
         """
         Transcribes audio data from the provided audio buffer.
 
@@ -102,7 +100,7 @@ class Transcriber:
         str: The transcribed text.
         """
         try:
-            segments, _ = self.model.transcribe(audio_buffer)
+            segments, _ = self._model.transcribe(audio_buffer)
             segments = list(segments)
             transcription = " ".join([segment.text for segment in segments])
             return transcription
@@ -121,10 +119,10 @@ class Transcriber:
         """
         try:
             input("Press Enter to start recording...")
-            self.start_recording()
+            self._start_recording()
             input("Recording... Press Enter again to stop recording.")
-            self.stop_recording()
+            self._stop_recording()
             print("Recording Complete. Transcribing...\n")
-            return self.get_predicted_text()
+            return self._get_predicted_text()
         except Exception as e:
             raise Exception("Error during audio recording and transcription: " + str(e))
