@@ -13,6 +13,10 @@ COMPUTE_TYPE = "float16"
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
 class Transcriber:
+    """
+    This class is responsible for transcribing audio input using the Whisper model.
+    It captures audio from the microphone, processes it, and uses the model to transcribe it into text.
+    """
     def __init__(self, model_name: str, device_type: str):
         """
         Initializes the Transcriber with a Whisper model and settings.
@@ -24,7 +28,7 @@ class Transcriber:
         try:
             self._model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
         except Exception as e:
-            raise Exception("Error initializing WhisperModel: " + str(e))
+            raise RuntimeError("Error initializing WhisperModel") from e
 
         self._is_recording = False
         self._predicted_text = ""
@@ -42,8 +46,8 @@ class Transcriber:
             while self._is_recording:
                 data = stream.read(256)
                 self._frames.append(np.frombuffer(data, dtype=np.int16))
-        except Exception as e:
-            raise Exception("Error capturing audio: " + str(e))
+        except IOError as e:
+            raise RuntimeError("Error capturing audio") from e
         finally:
             stream.stop_stream()
             stream.close()
@@ -111,7 +115,7 @@ class Transcriber:
             transcription = " ".join([segment.text for segment in segments])
             return transcription
         except Exception as e:
-            raise Exception("Error transcribing audio: " + str(e))
+            raise RuntimeError("Error transcribing audio") from e
 
     def transcribe(self):
         """
@@ -130,5 +134,5 @@ class Transcriber:
             self._stop_recording()
             print("Recording Complete. Transcribing...\n")
             return self._get_predicted_text()
-        except Exception as e:
-            raise Exception("Error during audio recording and transcription: " + str(e))
+        except RuntimeError  as e:
+            raise RuntimeError ("Error during audio recording and transcription: ")  from e
