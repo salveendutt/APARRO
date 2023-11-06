@@ -120,7 +120,7 @@ class Transcriber:
         except Exception as e:
             raise RuntimeError("Error transcribing audio") from e
 
-    def transcribe(self):
+    def transcribe(self) -> str:
         """
         Perform audio recording and transcription.
 

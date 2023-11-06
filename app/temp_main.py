@@ -6,41 +6,6 @@ It includes demonstrations of order transcription, order prediction, and direct 
 import waiter as wt
 import transcriber as tr
 
-def main_output_demo():
-    """
-    Demonstrates the processing of a backup order in JSON format.
-    """
-    backup_order = """
-    {
-        "dish": "MacCrispy",
-        "quantity": 1,
-        "comment": "without pickle"
-    },
-    {
-        "dish": "French Fries",
-        "quantity": 3,
-        "comment": ""
-    },
-    {
-        "dish": "Big Mac",
-        "quantity": 2,
-        "comment": ""
-    },
-    {
-        "dish": "Chicken Biriani",
-        "quantity": 1,
-        "comment": "Spicy"
-    },
-    {
-        "dish": "Coke",
-        "quantity": 1,
-        "comment": ""
-    }"""
-    waiter = wt.Waiter()
-    dict_order = wt.json_to_dict(backup_order)
-    waiter._process_order(dict_order)
-    waiter.print_order()
-
 def main_transcribe():
     """
     Demonstrates the transcription of an order using the transcriber.
