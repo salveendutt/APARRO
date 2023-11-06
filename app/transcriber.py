@@ -15,7 +15,8 @@ COMPUTE_TYPE = "float16"
 class Transcriber:
     """
     This class is responsible for transcribing audio input using the Whisper model.
-    It captures audio from the microphone, processes it, and uses the model to transcribe it into text.
+    It captures audio from the microphone, processes it,
+    and uses the model to transcribe it into text.
     """
     def __init__(self, model_name: str, device_type: str):
         """
@@ -72,7 +73,7 @@ class Transcriber:
             self._predicted_text = transcription
             self._transcription_done.set()
         except Exception as e:
-            raise Exception("Error recording and transcribing audio: " + str(e))
+            raise RuntimeError("Error recording and transcribing audio: " + str(e)) from e
 
     def _start_recording(self):
         """

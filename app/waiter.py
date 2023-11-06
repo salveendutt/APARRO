@@ -162,7 +162,7 @@ def initialize_model(model_path_or_repo_id, model_file, model_type):
                                                     model_file=model_file,
                                                     model_type=model_type)
     except Exception as e:
-        raise Exception("Error initializing the model: " + str(e))
+        raise RuntimeError("Error initializing the model: " + str(e)) from e
 
 def json_to_dict(json_str: str):
     """
@@ -180,4 +180,4 @@ def json_to_dict(json_str: str):
         json_dict = json.loads(json_str)
         return json_dict
     except Exception as e:
-        raise Exception("Error converting JSON to dictionary: " + str(e))
+        raise RuntimeError("Error converting JSON to dictionary: " + str(e)) from e
