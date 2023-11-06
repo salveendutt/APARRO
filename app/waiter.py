@@ -65,14 +65,14 @@ class Waiter:
         llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
         # Stage 3, Running the model
         print("Predicting...")
-        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0, 
+        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0,
                          top_k=55, top_p=0.9, repetition_penalty=1.2)
         print(f"Model output: {json_order}")
         # Stage 4, Converting from JSON to dictionary
         dict_order = json_to_dict(json_order)
         # Stage 5, Processing the Order
         self._process_order(dict_order)
-    
+
     def print_order(self):
         """
         Prints the ordered items and unavailable items in a formatted manner.
@@ -84,7 +84,7 @@ class Waiter:
         """
         ordered_items = []
         unavailable_items = self._unavailable
-        
+
         for item in self._ordered:
             ordered_item_str = f"{item['quantity']} {item['dish']}"
             if item['comment']:

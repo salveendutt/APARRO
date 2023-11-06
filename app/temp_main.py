@@ -37,8 +37,8 @@ def main_output_demo():
         "comment": ""
     }"""
     waiter = wt.Waiter()
-    dict_order = waiter.json_to_dict(backup_order)
-    waiter.process_order(dict_order)
+    dict_order = wt.json_to_dict(backup_order)
+    waiter._process_order(dict_order)
     waiter.print_order()
 
 def main_transcribe():

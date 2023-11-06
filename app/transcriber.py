@@ -36,7 +36,7 @@ class Transcriber:
         Captures audio from the microphone and stores it in frames.
         """
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=pyaudio.paInt16, channels=1, 
+        stream = audio.open(format=pyaudio.paInt16, channels=1,
                             rate=16000, input=True, frames_per_buffer=1024)
         try:
             while self._is_recording:

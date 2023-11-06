@@ -38,7 +38,6 @@ class Restaurant:
         """
         if self._waiter is None or self._transcriber is None:
             raise ValueError("Waiter and transcriber must be set before taking orders.")
-        
         pred_order_str = self._transcriber.transcribe()
         self._waiter.create_order(pred_order_str)
         self._waiter.print_order()
