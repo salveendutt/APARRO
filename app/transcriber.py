@@ -12,6 +12,8 @@ from faster_whisper import WhisperModel
 COMPUTE_TYPE = "float16"
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
+
+# pylint: disable=R0903
 class Transcriber:
     """
     This class is responsible for transcribing audio input using the Whisper model.
