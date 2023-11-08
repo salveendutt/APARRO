@@ -15,13 +15,14 @@ MODEL_TYPE = "mistral"
 
 class Waiter:
     """
-    The Waiter class processes customer orders by interpreting them with a language model
+    The Waiter class processes customer orders by interpreting them with a large language model
     and matching them against a known menu. It handles both available and unavailable items.
     """
     def __init__(self):
         self._ordered = []
         self._unavailable = []
-
+        self._llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
+        
     def _process_order(self, order: dict):
         """
         Processes a customer's order, confirming items and identifying those not on the menu.
@@ -61,16 +62,14 @@ class Waiter:
         # Stage 1, Creating Prompt for the Model
         prompt = create_prompt(order)
         print(prompt)
-        # Stage 2, Preparing model
-        llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
-        # Stage 3, Running the model
+        # Stage 2, Running the model
         print("Predicting...")
-        json_order = llm(prompt, max_new_tokens=2048, temperature=0.0,
+        json_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
                          top_k=55, top_p=0.9, repetition_penalty=1.2)
         print(f"Model output: {json_order}")
-        # Stage 4, Converting from JSON to dictionary
+        # Stage 3, Converting from JSON to dictionary
         dict_order = json_to_dict(json_order)
-        # Stage 5, Processing the Order
+        # Stage 4, Processing the Order
         self._process_order(dict_order)
 
     def print_order(self):
