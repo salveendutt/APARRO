@@ -22,7 +22,7 @@ class Waiter:
         self._ordered = []
         self._unavailable = []
         self._llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
-        
+
     def _process_order(self, order: dict):
         """
         Processes a customer's order, confirming items and identifying those not on the menu.
