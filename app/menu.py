@@ -1,3 +1,4 @@
+"""Dataset of Menu Items"""
 mcdonalds_menu = {
     "McChicken",
     "Mac Chicken",
@@ -19,14 +20,9 @@ mcdonalds_menu = {
     "Daily Double",
     "McRib",
     "Premium McWrap Chicken & Bacon",
-    "Premium McWrap Chicken & Bacon",
-    "Premium McWrap Chicken & Ranch",
     "Premium McWrap Chicken & Ranch",
     "Premium McWrap Sweet Chili Chicken",
-    "Premium McWrap Sweet Chili Chicken",
     "Chipotle BBQ Snack Wrap",
-    "Chipotle BBQ Snack Wrap",
-    "Honey Mustard Snack Wrap",
     "Honey Mustard Snack Wrap",
     "Ranch Snack Wrap",
     "Ranch Snack Wrap (Grilled)",
@@ -38,7 +34,6 @@ mcdonalds_menu = {
     "Premium Grilled Chicken Club Sandwich",
     "Premium Crispy Chicken Ranch BLT Sandwich",
     "Premium Grilled Chicken Ranch BLT Sandwich",
-    "McChicken",
     "Southern Style Crispy Chicken Sandwich",
     "Filet-O-Fish",
     "Premium Bacon Ranch Salad",
