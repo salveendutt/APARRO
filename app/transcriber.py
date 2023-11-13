@@ -97,7 +97,7 @@ class Transcriber:
         self._predicted_text = ""
         recording_thread = threading.Thread(target=self._record_audio)
         recording_thread.start()
-    
+
     def _stop_recording(self):
         """
         Stops the audio recording process.
@@ -187,3 +187,4 @@ class Transcriber:
             return self._get_predicted_text()
         except RuntimeError as e:
             raise RuntimeError("Error during audio recording and transcription: ") from e
+            
