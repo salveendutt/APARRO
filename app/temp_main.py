@@ -28,6 +28,10 @@ def main_predict_order():
 
 if __name__ == "__main__":
     # Uncomment the function you wish to demonstrate
-    # main_transcribe()
-    main_predict_order()
+     main_transcribe()
+    #main_predict_order()
     # main_output_demo()
+
+
+
+
