@@ -39,23 +39,25 @@ class TestWaiter(unittest.TestCase):
 
     def test_process_order_with_available_items(self):
         order = [{"dish": "Big Mac", "quantity": 2, "comment": "No pickles"}]
-        self.waiter._process_order(order)
-        ordered_items = self.waiter._ordered
+        self.waiter.__process_order(order)
+        ordered_items = self.waiter.__ordered
         self.assertEqual(len(ordered_items), 1)
         self.assertEqual(ordered_items[0]["dish"], "Big Mac")
 
     def test_process_order_with_unavailable_items(self):
         order = [{"dish": "Unknown Dish", "quantity": 1, "comment": "Extra sauce"}]
-        self.waiter._process_order(order)
-        unavailable_items = self.waiter._unavailable
+        self.waiter.__process_order(order)
+        unavailable_items = self.waiter.__unavailable
         self.assertEqual(len(unavailable_items), 1)
         self.assertEqual(unavailable_items[0], "Unknown Dish")
 
     def test_create_order(self):
-        order_str = '{"dish": "Chicken McNuggets", "quantity": 3, "comment": "Sweet and Sour sauce"}'
-        self.waiter._llm = MagicMock(return_value='{"dish": "Big Mac", "quantity": 1, "comment": ""}')
+        order_str = 'Give me a Big Mac'
+        self.waiter.__llm = MagicMock(
+            return_value='{"dish": "Big Mac", "quantity": 1, "comment": ""}'
+            )
         self.waiter.create_order(order_str)
-        ordered_items = self.waiter._ordered
+        ordered_items = self.waiter.__ordered
         self.assertEqual(len(ordered_items), 1)
         self.assertEqual(ordered_items[0]["dish"], "Big Mac")
 
