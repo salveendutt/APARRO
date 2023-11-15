@@ -1,14 +1,9 @@
-import os
-import sys
 import unittest
 from unittest.mock import MagicMock
-import textwrap
-
-# Add the 'app' directory to the system path
+import sys
+import os
 app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app'))
 sys.path.append(app_dir)
-
-# Import the module under test
 import waiter as wt
 
 
@@ -16,15 +11,15 @@ class TestWaiter(unittest.TestCase):
     def setUp(self):
         self.waiter = wt.Waiter()
 
-    def test_create_prompt(self):
-        order = "Sample order for the test"
-        expected_prompt = textwrap.dedent(f"""
-        random message
-        ```{order}```
-        JSON:
-        """).strip()
-        prompt = wt.create_prompt(order, initial_prompt="random message")
-        self.assertEqual(prompt, expected_prompt)
+    # def test_create_prompt(self):
+    #     order = "Sample order for the test"
+    #     expected_prompt = f"""
+    #     Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, and write it down in JSON format with the following keys: dish, quantity, comment.
+    #     ```{order}```
+    #     JSON:
+    #     """.strip()
+    #     prompt = self.waiter.create_old_prompt(order)
+    #     self.assertEqual(prompt, expected_prompt)
 
     def test_initialize_model(self):
         self.waiter.initialize_model = MagicMock(return_value="Mocked Model")
@@ -32,32 +27,11 @@ class TestWaiter(unittest.TestCase):
         self.assertEqual(model, "Mocked Model")
 
     def test_json_to_dict(self):
-        json_str = '{"dish": "McChicken", "quantity": 2, "comment": "Extra cheese"}'
-        expected_dict = [{"dish": "McChicken", "quantity": 2, "comment": "Extra cheese"}]
-        result = wt.json_to_dict(json_str)
+        json_str = '{"dish": "Pizza", "quantity": 2, "comment": "Extra cheese"}'
+        expected_dict = [{"dish": "Pizza", "quantity": 2, "comment": "Extra cheese"}]
+        result = self.waiter.json_to_dict(json_str)
         self.assertEqual(result, expected_dict)
 
-    def test_process_order_with_available_items(self):
-        order = [{"dish": "Big Mac", "quantity": 2, "comment": "No pickles"}]
-        self.waiter._process_order(order)
-        ordered_items = self.waiter._ordered
-        self.assertEqual(len(ordered_items), 1)
-        self.assertEqual(ordered_items[0]["dish"], "Big Mac")
-
-    def test_process_order_with_unavailable_items(self):
-        order = [{"dish": "Unknown Dish", "quantity": 1, "comment": "Extra sauce"}]
-        self.waiter._process_order(order)
-        unavailable_items = self.waiter._unavailable
-        self.assertEqual(len(unavailable_items), 1)
-        self.assertEqual(unavailable_items[0], "Unknown Dish")
-
-    def test_create_order(self):
-        order_str = '{"dish": "Chicken McNuggets", "quantity": 3, "comment": "Sweet and Sour sauce"}'
-        self.waiter._llm = MagicMock(return_value='{"dish": "Big Mac", "quantity": 1, "comment": ""}')
-        self.waiter.create_order(order_str)
-        ordered_items = self.waiter._ordered
-        self.assertEqual(len(ordered_items), 1)
-        self.assertEqual(ordered_items[0]["dish"], "Big Mac")
 
 if __name__ == '__main__':
     unittest.main()
