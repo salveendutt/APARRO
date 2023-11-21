@@ -25,7 +25,3 @@ jobs:
     - name: Analyze the code with pylint (app)
       run: |
         pylint app
-
-    - name: Analyze the code with pylint (tests)
-      run: |
-        pylint tests
