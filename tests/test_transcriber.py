@@ -88,7 +88,56 @@ class TestTranscriber(unittest.TestCase):
         self.assertTrue(self.transcriber._is_recording)
         self.assertFalse(self.transcriber._is_paused)
 
-    
+    @patch('transcriber.WhisperModel.transcribe', side_effect=Exception("Mock exception"))
+    def test_transcribe_audio_exception_handling(self, mock_transcribe):
+        audio_buffer = io.BytesIO(b"dummy audio data")
+        with self.assertRaises(RuntimeError) as context:
+            self.transcriber._transcribe_audio(audio_buffer)
+        self.assertIn("Error transcribing audio", str(context.exception))
+
+    @patch('transcriber.keyboard')
+    @patch('transcriber.time')
+    def test_transcribe_method(self, mock_time, mock_keyboard):
+        # Initialize time mock
+        mock_time_values = [0, 0.6, 1.2, 1.8, 2.4, 3.0]  # Simulates time passing
+        mock_time.time.side_effect = lambda: mock_time_values.pop(0)
+
+        # Initialize keyboard mock for 'p' (pause) and 'r' (resume)
+        mock_keyboard.is_pressed.side_effect = lambda key: {
+            'p': [False, True, False, False, False][len(mock_time_values) - 1],
+            'r': [False, False, True, False, False][len(mock_time_values) - 1],
+            's': [False, False, False, True, False][len(mock_time_values) - 1]
+        }[key]
+
+        # Initialize Transcriber
+        tr = self.transcriber
+
+        # Mocking the recording process methods
+        tr._start_recording = MagicMock()
+        tr._pause_recording = MagicMock()
+        tr._resume_recording = MagicMock()
+        tr._stop_recording = MagicMock()
+        tr._get_predicted_text = MagicMock(return_value="Mocked transcription")
+
+        # Test the transcribe method
+        result = tr.transcribe()
+
+        # Assertions
+        tr._start_recording.assert_called_once()
+        tr._pause_recording.assert_called_once()
+        tr._resume_recording.assert_called_once()
+        tr._stop_recording.assert_called_once()
+        tr._get_predicted_text.assert_called_once()
+        self.assertEqual(result, "Mocked transcription")
+
+    @patch('transcriber.Transcriber._start_recording', side_effect=RuntimeError("Mocked recording error"))
+    def test_transcribe_exception_handling(self, mock_start_recording):
+        tr = self.transcriber
+
+        with self.assertRaises(RuntimeError) as context:
+            tr.transcribe()
+        self.assertIn("Error during audio recording and transcription:", str(context.exception))
+
 
 if __name__ == '__main__':
     unittest.main()
