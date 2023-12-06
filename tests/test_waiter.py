@@ -46,16 +46,16 @@ class TestWaiter(unittest.TestCase):
     def test_process_order_with_available_items(self):
         """Test processing an order with available items."""
         order = [{"dish": "Big Mac", "quantity": 2, "comment": "No pickles"}]
-        self.waiter._Waiter__process_order(order)
-        ordered_items = self.waiter._Waiter__ordered
+        self.waiter._process_order(order)
+        ordered_items = self.waiter._ordered
         self.assertEqual(len(ordered_items), 1)
         self.assertEqual(ordered_items[0]["dish"], "Big Mac")
 
     def test_process_order_with_unavailable_items(self):
         """Test processing an order with unavailable items."""
         order = [{"dish": "Unknown Dish", "quantity": 1, "comment": "Extra sauce"}]
-        self.waiter._Waiter__process_order(order)
-        unavailable_items = self.waiter._Waiter__unavailable
+        self.waiter._process_order(order)
+        unavailable_items = self.waiter._unavailable
         self.assertEqual(len(unavailable_items), 1)
         self.assertEqual(unavailable_items[0], "Unknown Dish")
 
@@ -66,7 +66,7 @@ class TestWaiter(unittest.TestCase):
             return_value='{"dish": "Big Mac", "quantity": 1, "comment": ""}'
         )
         self.waiter.create_order(order_str)
-        ordered_items = self.waiter._Waiter__ordered
+        ordered_items = self.waiter._ordered
         self.assertEqual(len(ordered_items), 1)
         self.assertEqual(ordered_items[0]["dish"], "Big Mac")
 
