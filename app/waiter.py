@@ -99,23 +99,22 @@ class Waiter:
         """
         ordered_items = []
         unavailable_items = self._unavailable
-
         for item in self._ordered:
             ordered_item_str = f"{item['quantity']} {item['dish']}"
             if item['comment']:
                 ordered_item_str += f" ({item['comment']})"
             ordered_items.append(ordered_item_str)
-
         ordered_str = ", ".join(ordered_items)
         unavailable_str = ", ".join(self._unavailable)
-
+        result_str = ""
         if ordered_items:
-            print(f"Your order is: {ordered_str}")
+            result_str += f"Your order is: {ordered_str}\n"
         else:
-            print("Sorry, there is nothing in our menu which you ordered")
-
+            result_str += "Sorry, there is nothing in our menu which you ordered\n"
         if unavailable_items:
-            print(f"Unfortunately we don't have: {unavailable_str}\n")
+            result_str += f"Unfortunately we don't have: {unavailable_str}\n"
+        print(result_str)
+        return result_str
 
 
 def create_prompt(order: str, initial_prompt=INITIAL_PROMPT):
