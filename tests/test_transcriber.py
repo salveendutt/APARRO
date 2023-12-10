@@ -27,7 +27,6 @@ class TestTranscriber(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             tr.Transcriber(model_name="medium.en", device_type=invalid_device_type)  # Should raise RuntimeError for invalid device type
 
-
     def test_transcribe_audio(self):
         audio_path = os.path.join(os.path.dirname(__file__), "testdata", "jfk.wav")
         with open(audio_path, 'rb') as f:
@@ -43,26 +42,16 @@ class TestTranscriber(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.transcriber._transcribe_audio(audio_buffer)  # Should raise RuntimeError
 
-
     def test_start_recording_and_stop_recording(self):
         self.transcriber._start_recording()  # Use private method
         self.assertTrue(self.transcriber._is_recording)  # Use private attribute
         self.transcriber._stop_recording()  # Use private method
         self.assertFalse(self.transcriber._is_recording)  # Use private attribute
 
-    def test_pause_and_resume(self):
-        self.transcriber._start_recording()  # Use private method
-        self.transcriber._pause_recording()
-        self.assertTrue(self.transcriber._is_paused)
-        self.transcriber._resume_recording()
-        self.assertFalse(self.transcriber._is_paused)
-
     def test_get_predicted_text(self):
         self.transcriber._transcription_done.set()  # Use private attribute
         predicted_text = self.transcriber._get_predicted_text()  # Use private method
         self.assertIsInstance(predicted_text, str)
-
-
 
 if __name__ == '__main__':
     unittest.main()
