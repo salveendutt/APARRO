@@ -22,6 +22,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install portaudio19-dev
         pip install -r requirements.txt
-    - name: Analysing the code with pylint
+    - name: Analyze the code with pylint (app)
       run: |
         pylint app

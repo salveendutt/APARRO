@@ -4,10 +4,12 @@ This module contains the Transcriber class for transcribing audio input using th
 
 import io
 import threading
+import time
 import numpy as np
 import pyaudio
 import soundfile as sf
 from faster_whisper import WhisperModel
+import keyboard
 
 COMPUTE_TYPE = "float16"
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string
@@ -34,6 +36,7 @@ class Transcriber:
             raise RuntimeError("Error initializing WhisperModel") from e
 
         self._is_recording = False
+        self._is_paused = False
         self._predicted_text = ""
         self._frames = []
         self._transcription_done = threading.Event()
@@ -43,17 +46,26 @@ class Transcriber:
         Captures audio from the microphone and stores it in frames.
         """
         audio = pyaudio.PyAudio()
-        stream = audio.open(format=pyaudio.paInt16, channels=1,
-                            rate=16000, input=True, frames_per_buffer=1024)
+        stream = None
         try:
-            while self._is_recording:
-                data = stream.read(256)
-                self._frames.append(np.frombuffer(data, dtype=np.int16))
+            while self._is_recording or self._is_paused:
+                if self._is_recording:
+                    if stream is None:
+                        stream = audio.open(format=pyaudio.paInt16, channels=1,
+                                            rate=16000, input=True, frames_per_buffer=1024)
+
+                    data = stream.read(256, exception_on_overflow=False)
+                    self._frames.append(np.frombuffer(data, dtype=np.int16))
+                elif stream is not None:
+                    stream.stop_stream()
+                    stream.close()
+                    stream = None
         except IOError as e:
             raise RuntimeError("Error capturing audio") from e
         finally:
-            stream.stop_stream()
-            stream.close()
+            if stream is not None:
+                stream.stop_stream()
+                stream.close()
             audio.terminate()
 
     def _record_audio(self):
@@ -91,6 +103,21 @@ class Transcriber:
         Stops the audio recording process.
         """
         self._is_recording = False
+        self._is_paused = False
+
+    def _pause_recording(self):
+        """
+        Pauses the audio recording process.
+        """
+        self._is_paused = True
+        self._is_recording = False
+
+    def _resume_recording(self):
+        """
+        Resumes the audio recording process.
+        """
+        self._is_paused = False
+        self._is_recording = True
 
     def _get_predicted_text(self) -> str:
         """
@@ -120,7 +147,7 @@ class Transcriber:
         except Exception as e:
             raise RuntimeError("Error transcribing audio") from e
 
-    def transcribe(self) -> str:
+    def transcribe(self):
         """
         Perform audio recording and transcription.
 
@@ -133,9 +160,31 @@ class Transcriber:
         try:
             input("Press Enter to start recording...")
             self._start_recording()
-            input("Recording... Press Enter again to stop recording.")
-            self._stop_recording()
-            print("Recording Complete. Transcribing...\n")
+            print("Recording... (Press 'p' to pause, 'r' to resume, 's' to stop)")
+            last_press_time = 0
+            debounce_int = 0.5  # 500 milliseconds
+
+            while True:
+                current_time = time.time()
+
+                if keyboard.is_pressed('p') and current_time - last_press_time > debounce_int:
+                    self._pause_recording()
+                    print("Recording paused. Press 'r' to resume or 's' to stop.")
+                    last_press_time = current_time
+
+                elif keyboard.is_pressed('r') and current_time - last_press_time > debounce_int:
+                    self._resume_recording()
+                    print("Recording resumed. Press 'p' to pause or 's' to stop.")
+                    last_press_time = current_time
+
+                elif keyboard.is_pressed('s') and current_time - last_press_time > debounce_int:
+                    self._stop_recording()
+                    print("Recording stopped. Transcribing...\n")
+                    break
+
+                time.sleep(0.1)  # Small sleep to prevent high CPU usage
+
             return self._get_predicted_text()
-        except RuntimeError  as e:
-            raise RuntimeError ("Error during audio recording and transcription: ")  from e
+        except RuntimeError as e:
+            raise RuntimeError("Error during audio recording and transcription: ") from e
+            
