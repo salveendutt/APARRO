@@ -113,6 +113,11 @@
     </script>
 
     <!-- Add additional HTML elements as needed -->
+    <!-- Add this block to include the output of a Python function -->
+    {% comment %} {% load restaurant_tags %} <!-- Replace with your actual app name --> {% endcomment %}
 
+    <!-- Assuming you have a function called get_order_status in waiter.py -->
+    {% comment %} <p>Order Status: {% get_order_status %}</p> {% endcomment %}
+    <p>Order Status: Unknown</p>
 </body>
 </html>
