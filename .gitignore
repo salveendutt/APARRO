@@ -1,5 +1,5 @@
 # Manual
-.bak
+*.bak
 output.json
 .vscode
 # Byte-compiled / optimized / DLL files
