@@ -12,6 +12,22 @@ from thefuzz import process
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
+INITIAL_PROMPT = textwrap.dedent("""
+    Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
+    Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
+    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately.
+    2. Provide the following information for each item:
+    - Dish: The name of the dish.
+    - Quantity: The number of portions or items ordered.
+    - Comment: Any specific instructions or comments related to the order.
+    3. Format the order as a JSON object with the following keys:
+    {{
+        "dish": "Dish Name",
+        "quantity": 2,  # Adjust the quantity as needed
+        "comment": "Add extra cheese"
+    }}
+    Now please find the order below inside backtics and return order in the proper JSON format
+""")
 
 class Waiter:
     """
@@ -83,26 +99,25 @@ class Waiter:
         """
         ordered_items = []
         unavailable_items = self._unavailable
-
         for item in self._ordered:
             ordered_item_str = f"{item['quantity']} {item['dish']}"
             if item['comment']:
                 ordered_item_str += f" ({item['comment']})"
             ordered_items.append(ordered_item_str)
-
         ordered_str = ", ".join(ordered_items)
         unavailable_str = ", ".join(self._unavailable)
-
+        result_str = ""
         if ordered_items:
-            print(f"Your order is: {ordered_str}")
+            result_str += f"Your order is: {ordered_str}\n"
         else:
-            print("Sorry, there is nothing in our menu which you ordered")
-
+            result_str += "Sorry, there is nothing in our menu which you ordered\n"
         if unavailable_items:
-            print(f"Unfortunately we don't have: {unavailable_str}\n")
+            result_str += f"Unfortunately we don't have: {unavailable_str}\n"
+        print(result_str)
+        return result_str
 
 
-def create_prompt(order: str):
+def create_prompt(order: str, initial_prompt=INITIAL_PROMPT):
     """
     Creates a prompt for the model to process a customer's order.
 
@@ -113,41 +128,11 @@ def create_prompt(order: str):
     str: The prompt for the model including the order.
     """
     prompt = textwrap.dedent(f"""
-    Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
-    Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
-    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately.
-    2. Provide the following information for each item:
-    - Dish: The name of the dish.
-    - Quantity: The number of portions or items ordered.
-    - Comment: Any specific instructions or comments related to the order.
-    3. Format the order as a JSON object with the following keys:
-    {{
-        "dish": "Dish Name",
-        "quantity": 2,  # Adjust the quantity as needed
-        "comment": "Add extra cheese"
-    }}
-    Now please find the order below inside backtics and return order in the proper JSON format
+    {initial_prompt}
     ```{order}```
     JSON:
     """)
     return prompt.strip()
-
-def create_old_prompt(order: str):
-    """
-    Creates a prompt for the model to process a customer's order.
-
-    Args:
-    order (str): The customer's order as a string.
-
-    Returns:
-    str: The prompt for the model including the order.
-    """
-    prompt = f"""
-    Read the restaurant order delimited by triple backticks, step by step analyze what the customer has ordered, and write it down in JSON format with the following keys: dish, quantity, comment.
-    ```{order}```
-    JSON:
-    """
-    return prompt
 
 def initialize_model(model_path_or_repo_id, model_file, model_type):
     """
