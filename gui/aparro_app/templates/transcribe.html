@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Transcription</title>
+</head>
+<body>
+    <button id="start">Start Recording</button>
+    <button id="stop" disabled>Stop Recording</button>
+    <p id="transcription"></p>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById('start').onclick = () => {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks);
+                        sendData(audioBlob);
+                        audioChunks = [];
+                    };
+                    mediaRecorder.start();
+                });
+            document.getElementById('stop').disabled = false;
+        };
+
+        document.getElementById('stop').onclick = () => {
+            mediaRecorder.stop();
+            document.getElementById('stop').disabled = true;
+        };
+
+        function sendData(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob);
+
+            fetch('/transcribe/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('transcription').innerText = data.transcription;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
