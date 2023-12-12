@@ -145,7 +145,7 @@ class Transcriber:
             transcription = " ".join([segment.text for segment in segments])
             return transcription
         except Exception as e:
-            raise RuntimeError("Error transcribing audio") from e
+            raise RuntimeError(f"Error transcribing audio: {str(e)}") from e
 
     def transcribe(self):
         """
