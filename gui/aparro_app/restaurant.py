@@ -5,8 +5,8 @@ and process them with a waiter.
 The RestaurantBuilder class provides a fluent interface to construct a Restaurant instance.
 """
 
-import waiter as wt
-import transcriber as tr
+from .waiter import Waiter as wt
+from .transcriber import Transcriber as tr
 
 class Restaurant:
     """
@@ -40,7 +40,7 @@ class Restaurant:
             raise ValueError("Waiter and transcriber must be set before taking orders.")
         pred_order_str = self._transcriber.transcribe()
         self._waiter.create_order(pred_order_str)
-        return self._waiter.print_order()
+        self._waiter.print_order()
 
     @staticmethod
     def builder():
@@ -66,7 +66,7 @@ class RestaurantBuilder:
         Returns:
         RestaurantBuilder: The current RestaurantBuilder instance with waiter.
         """
-        waiter = wt.Waiter()
+        waiter = wt()
         self._restaurant.set_waiter(waiter)
         return self
 
@@ -81,7 +81,7 @@ class RestaurantBuilder:
         Returns:
         RestaurantBuilder: The current RestaurantBuilder instance with transcriber.
         """
-        transcriber = tr.Transcriber(model_name, device_type)
+        transcriber = tr(model_name, device_type)
         self._restaurant.set_transcriber(transcriber)
         return self
 

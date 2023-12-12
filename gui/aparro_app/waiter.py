@@ -5,7 +5,7 @@ It uses a language model to interpret the orders and matches them against a menu
 
 import textwrap
 import json
-import menu as mn
+from .menu import mcdonalds_menu as mn
 from ctransformers import AutoModelForCausalLM
 from thefuzz import process
 
@@ -56,7 +56,7 @@ class Waiter:
             quantity = food_item["quantity"]
             comment = food_item["comment"]
             # Using fuzziness to find the most similar item on the menu
-            best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
+            best_match, similarity_score = process.extractOne(dish, mn)
             # Make sure this item does belong in the menu,
             # if similarity is below 90 - it is not in menu
             if similarity_score >= 90:

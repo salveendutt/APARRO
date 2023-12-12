@@ -7,7 +7,7 @@ from .views import ready_page
 urlpatterns = [
     path('', views.index, name='index'),
     path('ready_page/', ready_page, name='ready_page'),
-    path('transcribe/', views.transcribe_audio, name='transcribe_audio'),
+    path('take-order/', views.take_order, name='take_order'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

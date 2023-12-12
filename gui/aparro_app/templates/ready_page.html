@@ -62,6 +62,20 @@
             font-size: 40px;
             margin-top: 500px;
         }
+        #orderResult {
+            position: absolute;
+            right: 255px; /* Adjust as needed */
+            top: 35%;
+            transform: translateY(-50%);
+            background-color: rgba(245,239,226,255);
+            color: black;
+            padding: 00px;
+            border-radius: 0px;
+            box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+            width: 300px; /* Adjust width as needed */
+            max-height: 500px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -77,6 +91,7 @@
         <a href="#" class="button">Finish</a>
     </div>
     <p id="statusLabel"></p>
+    <div id="orderResult"></div>
 
     <script>
         // JavaScript to handle button click and text change
@@ -87,17 +102,6 @@
         const finishButton = document.querySelector('.button-container .button:last-child');
         let isPaused = false;
     
-        readyButton.addEventListener('click', function () {
-            // Hide the cover when "Ready" button is clicked
-            cover.style.display = 'none';
-        });
-    
-        finishButton.addEventListener('click', function () {
-            // Show the cover with "Thank you" message when "Finish" button is clicked
-            cover.style.display = 'flex';
-            document.querySelector('#cover p').innerText = 'Thank you, your order will arrive shortly!';
-            document.querySelector('#cover button').style.display = 'none'; // Hide the button in the "Thank you" message
-        });
     
         pauseResumeButton.addEventListener('click', function () {
             isPaused = !isPaused;
@@ -110,6 +114,52 @@
                 statusLabel.innerText = 'Listening';
             }
         });
+        let mediaRecorder;
+        let audioChunks = [];
+
+        readyButton.addEventListener('click', function () {
+            cover.style.display = 'none';
+
+            // Start audio recording
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+                    mediaRecorder.start();
+                });
+            statusLabel.innerText = 'Listening';
+        });
+
+        finishButton.addEventListener('click', function () {
+            // Stop audio recording
+            mediaRecorder.stop();
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks);
+                sendData(audioBlob);
+                audioChunks = [];
+            };
+            
+            // Hide the cover and reset the status label
+            cover.style.display = 'none';
+            statusLabel.innerText = '';
+        });
+
+        function sendData(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob);
+
+            fetch('/take-order/', {  // Update the URL as per your configuration
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('orderResult').innerText = 'Order Result: ' + data.order;
+            })
+            .catch(error => console.error('Error:', error));
+        }
     </script>
 
     <!-- Add additional HTML elements as needed -->
