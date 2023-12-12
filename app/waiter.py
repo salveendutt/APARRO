@@ -15,11 +15,11 @@ MODEL_TYPE = "mistral"
 INITIAL_PROMPT = textwrap.dedent("""
     Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
     Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
-    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately.
+    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately. Also make sure to include sizes of dishes/drinks in the comments.
     2. Provide the following information for each item:
     - Dish: The name of the dish.
     - Quantity: The number of portions or items ordered.
-    - Comment: Any specific instructions or comments related to the order.
+    - Comment: Any specific instructions or comments related to the order (including size of the drink like: large, medium, small, and other comments like cold, hot, spicy).
     3. Format the order as a JSON object with the following keys:
     {{
         "dish": "Dish Name",
@@ -54,7 +54,10 @@ class Waiter:
         for food_item in order:
             dish = food_item["dish"]
             quantity = food_item["quantity"]
-            comment = food_item["comment"]
+            try:
+                comment = food_item["comment"]
+            except KeyError:
+                comment = ""
             # Using fuzziness to find the most similar item on the menu
             best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
             # Make sure this item does belong in the menu,
