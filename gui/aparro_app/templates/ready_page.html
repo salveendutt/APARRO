@@ -1,0 +1,167 @@
+<!-- myapp/templates/order_page.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('{% static "aparro_app/img/listening.png" %}');
+            background-size: contain;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Inknut Antiqua', sans-serif;
+        }
+
+        /* Container for buttons on the left */
+        .button-container {
+            position:absolute;
+            left: 400px; /* Adjust the left position as needed */
+            top: 65%; /* Adjust the top position as needed */
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Style for the buttons */
+        .button {
+            position: relative;
+            margin-bottom: 10px; /* Adjust the margin between buttons as needed */
+            padding: 30px 60px;
+            background-color: #BB3216; /* Adjust button background color */
+            color: white;
+            text-decoration: none;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 20px;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Additional style for the label */
+        #statusLabel {
+            font-size: 40px;
+            margin-top: 500px;
+        }
+        #orderResult {
+            position: absolute;
+            right: 255px; /* Adjust as needed */
+            top: 35%;
+            transform: translateY(-50%);
+            background-color: rgba(245,239,226,255);
+            color: black;
+            padding: 00px;
+            border-radius: 0px;
+            box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+            width: 300px; /* Adjust width as needed */
+            max-height: 500px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark blue cover with text and "Ready" button -->
+    <div id="cover" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 255, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;">
+        <p style="color: white; font-size: 24px;">Please be ready to express your order</p>
+        <button id="readyButton" style="padding: 15px 30px; background-color: #BB3216; color: white; font-size: 18px; cursor: pointer;">Ready</button>
+    </div>
+
+    <!-- Your existing content -->
+    <div class="button-container">
+        <a href="#" class="button" id="pauseResumeButton">Pause</a>
+        <a href="#" class="button">Finish</a>
+    </div>
+    <p id="statusLabel"></p>
+    <div id="orderResult"></div>
+
+    <script>
+        // JavaScript to handle button click and text change
+        const pauseResumeButton = document.getElementById('pauseResumeButton');
+        const statusLabel = document.getElementById('statusLabel');
+        const cover = document.getElementById('cover');
+        const readyButton = document.getElementById('readyButton');
+        const finishButton = document.querySelector('.button-container .button:last-child');
+        let isPaused = false;
+    
+    
+        pauseResumeButton.addEventListener('click', function () {
+            isPaused = !isPaused;
+    
+            if (isPaused) {
+                pauseResumeButton.innerText = 'Resume';
+                statusLabel.innerText = 'Paused';
+            } else {
+                pauseResumeButton.innerText = 'Pause';
+                statusLabel.innerText = 'Listening';
+            }
+        });
+        let mediaRecorder;
+        let audioChunks = [];
+
+        readyButton.addEventListener('click', function () {
+            cover.style.display = 'none';
+
+            // Start audio recording
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+                    mediaRecorder.start();
+                });
+            statusLabel.innerText = 'Listening';
+        });
+
+        finishButton.addEventListener('click', function () {
+            // Stop audio recording
+            mediaRecorder.stop();
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks);
+                sendData(audioBlob);
+                audioChunks = [];
+            };
+            
+            // Hide the cover and reset the status label
+            cover.style.display = 'none';
+            statusLabel.innerText = '';
+        });
+
+        function sendData(audioBlob) {
+            const formData = new FormData();
+            formData.append('audio_data', audioBlob);
+
+            fetch('/take-order/', {  // Update the URL as per your configuration
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('orderResult').innerText = 'Order Result: ' + data.order;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <!-- Add additional HTML elements as needed -->
+`</body>
+</html>
