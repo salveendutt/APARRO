@@ -7,6 +7,8 @@ from .views import ready_page
 urlpatterns = [
     path('', views.index, name='index'),
     path('ready_page/', ready_page, name='ready_page'),
+    path('pause-recording/', views.pause_recording, name='pause_recording'),
+    path('resume-recording/', views.resume_recording, name='resume_recording'),
     path('take-order/', views.take_order, name='take_order'),
 ]
 if settings.DEBUG:

@@ -2,6 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .restaurant import Restaurant as rst
+from .transcriber import Transcriber
+
+tr = Transcriber(model_name="medium.en", device_type="cuda")
 
 @csrf_exempt
 def take_order(request):
@@ -25,6 +28,22 @@ def take_order(request):
 
         return JsonResponse({'order': order_result})
     return render(request, 'take_order.html')
+
+@csrf_exempt
+def pause_recording(request):
+    if request.method == 'POST':
+        # Call pause method on your Transcriber instance
+        # Assuming you have a global or accessible instance of Transcriber
+        tr._pause_recording()
+        return JsonResponse({'status': 'paused'})
+
+@csrf_exempt
+def resume_recording(request):
+    if request.method == 'POST':
+        # Call resume method on your Transcriber instance
+        tr._resume_recording()
+        return JsonResponse({'status': 'resumed'})
+
 
 def index(request):
     return render(request, 'index.html')
