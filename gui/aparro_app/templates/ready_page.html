@@ -189,6 +189,7 @@
 
         const pauseResumeListener = function () {
             if (mediaRecorder) {
+
             switch (mediaRecorder.state) {
                 case "recording":
                     mediaRecorder.pause();
@@ -206,6 +207,7 @@
 
         const finishListener = function () {
             if (mediaRecorder) {
+
             // Stop the media recorder
             mediaRecorder.stop();
 
@@ -216,6 +218,7 @@
 
             // Update UI or status if needed
             statusLabel.innerText = '';
+
 
             // Additional logic for handling the recorded data
             mediaRecorder.onstop = () => {
@@ -231,6 +234,7 @@
         pauseResumeButton.addEventListener('click', pauseResumeListener);
         
         finishButton.addEventListener('click', finishListener);
+
 
 
         function sendData(audioBlob) {
@@ -264,6 +268,7 @@
                 finishButton.addEventListener('click', function() {
                     window.location.href = '/'; 
                 });
+
             })
 
             .catch(error => {

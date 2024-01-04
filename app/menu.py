@@ -6,7 +6,9 @@ mcdonalds_menu = {
     "Mac Crispy",
     "Big Mac",
     "Coke",
-    "Quarter Pounder with Cheese",
+    "Sprite"
+    "McToast",
+    "Mac Toast",
     "BLT Quarter Pounder",
     "Bacon Habanero Ranch Quarter Pounder",
     "Bacon & Cheese Quarter Pounder",
@@ -17,6 +19,7 @@ mcdonalds_menu = {
     "Grilled Onion Cheddar Burger",
     "Double Cheeseburger",
     "McDouble",
+    "Mac Double"
     "Daily Double",
     "McRib",
     "Premium McWrap Chicken & Bacon",

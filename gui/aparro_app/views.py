@@ -1,6 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+# # from .restaurant import Restaurant as rst
+# import sys
+# sys.path.append('../app')
+# from restaurant import Restaurant as rst
 from .restaurant import Restaurant as rst
 from .transcriber import Transcriber
 

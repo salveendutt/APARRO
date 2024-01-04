@@ -3,11 +3,13 @@ This module contains the Waiter class which is responsible for processing custom
 It uses a language model to interpret the orders and matches them against a menu.
 """
 
-import textwrap
 import json
-import menu as mn
-from ctransformers import AutoModelForCausalLM
+import logging
+import textwrap
+
+from ctransformers import AutoConfig, AutoModelForCausalLM
 from thefuzz import process
+import menu as mn
 
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
@@ -15,7 +17,7 @@ MODEL_TYPE = "mistral"
 INITIAL_PROMPT = textwrap.dedent("""
     Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
     Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
-    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately. Also make sure to include sizes of dishes/drinks in the comments.
+    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately. Also make sure to include sizes of dishes/drinks in the comments. If the customer DID NOT MENTION the order or any food items, return an EMPTY json file
     2. Provide the following information for each item:
     - Dish: The name of the dish.
     - Quantity: The number of portions or items ordered.
@@ -28,6 +30,7 @@ INITIAL_PROMPT = textwrap.dedent("""
     }}
     Now please find the order below inside backtics and return order in the proper JSON format
 """)
+logging.basicConfig(level=logging.INFO)
 
 class Waiter:
     """
@@ -80,12 +83,11 @@ class Waiter:
         """
         # Stage 1, Creating Prompt for the Model
         prompt = create_prompt(order)
-        print(prompt)
         # Stage 2, Running the model
-        print("Predicting...")
+        logging.info("Predicting...")
         json_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
                          top_k=55, top_p=0.9, repetition_penalty=1.2)
-        print(f"Model output: {json_order}")
+        logging.info("Model output: %s", json_order)
         # Stage 3, Converting from JSON to dictionary
         dict_order = json_to_dict(json_order)
         # Stage 4, Processing the Order
@@ -116,7 +118,6 @@ class Waiter:
             result_str += "Sorry, there is nothing in our menu which you ordered\n"
         if unavailable_items:
             result_str += f"Unfortunately we don't have: {unavailable_str}\n"
-        print(result_str)
         return result_str
 
 
@@ -145,9 +146,13 @@ def initialize_model(model_path_or_repo_id, model_file, model_type):
     AutoModelForCausalLM: The initialized large language model.
     """
     try:
+        config = AutoConfig.from_pretrained("TheBloke/Mistral-7B-v0.1-GGUF")
+        config.config.max_new_tokens = 2560
+        config.config.context_length = 4096
         return AutoModelForCausalLM.from_pretrained(model_path_or_repo_id,
                                                     model_file=model_file,
-                                                    model_type=model_type)
+                                                    model_type=model_type,
+                                                    config=config)
     except Exception as e:
         raise RuntimeError("Error initializing the model: " + str(e)) from e
 
