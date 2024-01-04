@@ -111,7 +111,7 @@ class Waiter:
         unavailable_str = ", ".join(self._unavailable)
         result_str = ""
         if ordered_items:
-            result_str += f"Your order is: {ordered_str}\n"
+            result_str += f"{ordered_str}\n"
         else:
             result_str += "Sorry, there is nothing in our menu which you ordered\n"
         if unavailable_items:

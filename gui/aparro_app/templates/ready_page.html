@@ -103,17 +103,10 @@
         let isPaused = false;
     
     
-        pauseResumeButton.addEventListener('click', function () {
-            isPaused = !isPaused;
-    
-            if (isPaused) {
-                pauseResumeButton.innerText = 'Resume';
-                statusLabel.innerText = 'Paused';
-            } else {
-                pauseResumeButton.innerText = 'Pause';
-                statusLabel.innerText = 'Listening';
-            }
-        });
+        let isRecordingPaused = false;
+
+        
+
         let mediaRecorder;
         let audioChunks = [];
 
@@ -132,19 +125,49 @@
             statusLabel.innerText = 'Listening';
         });
 
-        finishButton.addEventListener('click', function () {
-            // Stop audio recording
+        pauseResumeButton.addEventListener('click', function () {
+        if (mediaRecorder) {
+            switch (mediaRecorder.state) {
+                case "recording":
+                    mediaRecorder.pause();
+                    pauseResumeButton.innerText = 'Resume';
+                    statusLabel.innerText = 'Paused';
+                    break;
+                case "paused":
+                    mediaRecorder.resume();
+                    pauseResumeButton.innerText = 'Pause';
+                    statusLabel.innerText = 'Recording...';
+                    break;
+            }
+        }
+    });
+
+
+
+    finishButton.addEventListener('click', function () {
+        if (mediaRecorder) {
+            // Stop the media recorder
             mediaRecorder.stop();
+
+            // Stop and release the media stream (microphone)
+            if (mediaRecorder.stream) {
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+
+            // Update UI or status if needed
+            statusLabel.innerText = 'Recording finished';
+
+            // Additional logic for handling the recorded data
             mediaRecorder.onstop = () => {
                 const audioBlob = new Blob(audioChunks);
                 sendData(audioBlob);
                 audioChunks = [];
             };
-            
-            // Hide the cover and reset the status label
-            cover.style.display = 'none';
-            statusLabel.innerText = '';
-        });
+        } else {
+            console.error("MediaRecorder not initialized");
+        }
+    });
+
 
         function sendData(audioBlob) {
             const formData = new FormData();
@@ -156,7 +179,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('orderResult').innerText = 'Order Result: ' + data.order;
+                document.getElementById('orderResult').innerText = 'Order Result:\n' + data.order;
             })
             .catch(error => console.error('Error:', error));
         }
