@@ -3,12 +3,13 @@ This module contains the Waiter class which is responsible for processing custom
 It uses a language model to interpret the orders and matches them against a menu.
 """
 
-import textwrap
 import json
-import menu as mn
-from ctransformers import AutoModelForCausalLM, AutoConfig
-from thefuzz import process
 import logging
+import textwrap
+
+from ctransformers import AutoConfig, AutoModelForCausalLM
+from thefuzz import process
+import menu as mn
 
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
@@ -87,7 +88,7 @@ class Waiter:
         logging.info("Predicting...")
         json_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
                          top_k=55, top_p=0.9, repetition_penalty=1.2)
-        logging.info(f"Model output: {json_order}")
+        logging.info("Model output: %s", json_order)
         # Stage 3, Converting from JSON to dictionary
         dict_order = json_to_dict(json_order)
         # Stage 4, Processing the Order
