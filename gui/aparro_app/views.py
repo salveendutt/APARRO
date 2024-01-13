@@ -26,7 +26,7 @@ def take_order(request):
         order_text = restaurant._transcriber._transcribe_audio(audio_file)
         # Process the order
         order_res = restaurant._waiter.create_order(order_text)
-        order_result = restaurant._waiter.print_order()
+        order_result = restaurant._waiter.get_order()
 
         return JsonResponse({'order': order_result})
     return render(request, 'take_order.html')
