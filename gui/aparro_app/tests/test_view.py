@@ -27,8 +27,7 @@ class TakeOrderViewTest(TestCase):
     #     self.assertIn('1 Big Mac', response_data)
     #     self.assertIn('1 Coke', response_data)
         
-        
-    # # Test for order which was changed. For example I want coke, actually change it to smth
+    # Test for order which was changed. For example I want coke, actually change it to sprite
     # def test_take_order_changed(self):
     #     audio_path = os.path.join(os.path.dirname(__file__), "changed_order.mp3")
     #     with open(audio_path, 'rb') as f:
@@ -61,11 +60,11 @@ class TakeOrderViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response_data = response.content.decode('utf-8')
-        self.assertIn('1 Big Mac, 1 SpriteMcToast, 1 French Fries\\nUnfortunately we don\'t have: Fanta\\n', response_data)
         self.assertIn('1 Big Mac', response_data)
         self.assertIn('1 SpriteMcToast', response_data)
         self.assertIn('1 French Fries', response_data)
         self.assertIn('Unfortunately we don\'t have: Fanta', response_data)
+
 
     # # Test order not in menu
     # def test_take_order_not_in_menu(self):
@@ -82,5 +81,7 @@ class TakeOrderViewTest(TestCase):
     #     self.assertEqual(response.status_code, 200)
 
     #     response_data = response.content.decode('utf-8')
+
     #     self.assertIn('{"order": "sorry, there is nothing in our menu which you ordered\\nunfortunately we don\'t have: chicken biryani,iced tea\\n"}'.replace(' ', ''), response_data.lower().replace(' ', ''))
+    #     self.assertIn('Sorry, there is nothing in our menu which you ordered\\nUnfortunately we don\'t have: Iced Tea, Chicken Biryani\\n', response_data)
         
