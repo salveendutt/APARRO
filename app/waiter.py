@@ -2,8 +2,6 @@
 This module contains the Waiter class which is responsible for processing customer orders.
 It uses a language model to interpret the orders and matches them against a menu.
 """
-
-import json
 import logging
 import textwrap
 
@@ -15,21 +13,16 @@ MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
 INITIAL_PROMPT = textwrap.dedent("""
-    Welcome to our restaurant order processing service. Before proceeding, please ensure that you spend some time analyzing the customer's order carefully. Customers may provide complex orders with modifications, and it's important to accurately interpret their preferences.
-    Please provide the customer's order in a clear and structured manner. We will assist you in converting it to JSON format for easy processing. Follow the instructions below:
-    1. Spend time to thoroughly analyze what the customer has ordered. Customers may provide detailed requests, such as modifying their initial order, which requires your attention to ensure their order is processed accurately. Also make sure to include sizes of dishes/drinks in the comments. If the customer DID NOT MENTION the order or any food items, return an EMPTY json file
-    2. Provide the following information for each item:
-    - Dish: The name of the dish.
-    - Quantity: The number of portions or items ordered.
-    - Comment: Any specific instructions or comments related to the order (including size of the drink like: large, medium, small, and other comments like cold, hot, spicy).
-    3. Format the order as a JSON object with the following keys:
-    {{
-        "dish": "Dish Name",
-        "quantity": 2,  # Adjust the quantity as needed
-        "comment": "Add extra cheese"
-    }}
-    Now please find the order below inside backtics and return order in the proper JSON format
-""")
+Welcome to our restaurant order processing service! Before proceeding, carefully analyze the customer's order, which may include complex requests and modifications. Accurate interpretation is crucial for customer satisfaction.
+Please present the customer's order in a clear and structured manner, following these instructions:
+1. Thoroughly analyze the customer's order, paying attention to details and potential modifications. If the customer didn't mention any items, don't return anything.
+2. For each item in the order, provide the following information:
+- Dish: Name of the dish.
+- Quantity: Number of portions or items ordered.
+- Comment: If not specified - keep it empty. Here should be specific instructions or comments, including drink sizes (e.g., large, medium, small) and other details (e.g., cold, hot, spicy).
+3. Return the order in CSV format, use | as a separator character.
+4. Do not output anything other than CSV output.
+""") 
 logging.basicConfig(level=logging.INFO)
 
 class Waiter:
@@ -41,35 +34,6 @@ class Waiter:
         self._ordered = []
         self._unavailable = []
         self._llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
-
-    def _process_order(self, order: dict):
-        """
-        Processes a customer's order, confirming items and identifying those not on the menu.
-
-        Args:
-        order (dict): The customer's order as a dictionary.
-
-        Updates:
-        self._ordered (list of dictionaries): List of dictionaries 
-        containing keys as "dish", "quantity", and "comment".
-        self._unavailable (list of dishes): List of dishes (names) not found in the menu.
-        """
-        for food_item in order:
-            dish = food_item["dish"]
-            quantity = food_item["quantity"]
-            try:
-                comment = food_item["comment"]
-            except KeyError:
-                comment = ""
-            # Using fuzziness to find the most similar item on the menu
-            best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
-            # Make sure this item does belong in the menu,
-            # if similarity is below 90 - it is not in menu
-            if similarity_score >= 90:
-                confirmed_item = {"dish": best_match, "comment": comment, "quantity": quantity}
-                self._ordered.append(confirmed_item)
-            else:
-                self._unavailable.append(dish)
 
     def create_order(self, order: str):
         """
@@ -85,15 +49,32 @@ class Waiter:
         prompt = create_prompt(order)
         # Stage 2, Running the model
         logging.info("Predicting...")
-        json_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
-                         top_k=55, top_p=0.9, repetition_penalty=1.2)
-        logging.info("Model output: %s", json_order)
-        # Stage 3, Converting from JSON to dictionary
-        dict_order = json_to_dict(json_order)
-        # Stage 4, Processing the Order
-        self._process_order(dict_order)
+        psv_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
+                         top_k=55, top_p=0.9, repetition_penalty=1.2).replace("```", "").replace(".", "")
+        psv_order = textwrap.dedent(psv_order)
+        logging.info("Model output: %s", psv_order)
+        # Stage 3, Processing the Order
+        self._process_psv_order(psv_order)
 
-    def print_order(self):
+    def _process_psv_order(self, order: str):
+        for line in order.split('\n'):
+            if '|' not in line:
+                continue
+            if not line.strip():
+                continue
+            food_item = line.split('|')
+            dish, quantity, comment = food_item
+            # Using fuzziness to find the most similar item on the menu
+            best_match, similarity_score = process.extractOne(dish, mn.mcdonalds_menu)
+            # Make sure this item does belong in the menu,
+            # if similarity is below 90 - it is not in menu
+            if similarity_score >= 90:
+                confirmed_item = {"dish": best_match, "comment": comment, "quantity": quantity}
+                self._ordered.append(confirmed_item)
+            else:
+                self._unavailable.append(dish)
+                
+    def get_order(self):
         """
         Prints the ordered items and unavailable items in a formatted manner.
 
@@ -119,7 +100,7 @@ class Waiter:
         if unavailable_items:
             result_str += f"Unfortunately we don't have: {unavailable_str}\n"
         return result_str
-
+    
 
 def create_prompt(order: str, initial_prompt=INITIAL_PROMPT):
     """
@@ -134,7 +115,7 @@ def create_prompt(order: str, initial_prompt=INITIAL_PROMPT):
     prompt = textwrap.dedent(f"""
     {initial_prompt}
     ```{order}```
-    JSON:
+    CSV order with | separator:
     """)
     return prompt.strip()
 
@@ -155,21 +136,3 @@ def initialize_model(model_path_or_repo_id, model_file, model_type):
                                                     config=config)
     except Exception as e:
         raise RuntimeError("Error initializing the model: " + str(e)) from e
-
-def json_to_dict(json_str: str):
-    """
-    Converts a JSON string to a Python dictionary.
-
-    Args:
-    json_str (str): The JSON string to convert.
-
-    Returns:
-    dict: The Python dictionary representation of the JSON.
-    """
-    try:
-        json_str = json_str.strip()
-        json_str = '[' + json_str + ']'
-        json_dict = json.loads(json_str)
-        return json_dict
-    except Exception as e:
-        raise RuntimeError("Error converting JSON to dictionary: " + str(e)) from e

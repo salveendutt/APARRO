@@ -34,24 +34,24 @@ class Restaurant:
 
         Uses the transcriber to convert voice input into text and the waiter to create the order.
 
-        Calls the print_order function to display the order to the customer.
+        Calls the get_order function to display the order to the customer.
         """
         if self._waiter is None or self._transcriber is None:
             raise ValueError("Waiter and transcriber must be set before taking orders.")
         pred_order_str = self._transcriber.transcribe()
         self._waiter.create_order(pred_order_str)
-        return self._waiter.print_order()
+        return self._waiter.get_order()
 
     def take_order_with_str(self, order: str):
         """
         Takes a customer's order as an input and passing it to the waiter.
 
-        Calls the print_order function to display the order to the customer.
+        Calls the get_order function to display the order to the customer.
         """
         if self._waiter is None:
             raise ValueError("Waiter must be set before taking orders.")
         self._waiter.create_order(order)
-        return self._waiter.print_order()
+        return self._waiter.get_order()
 
     @staticmethod
     def builder():

@@ -24,10 +24,26 @@ def main_predict_order():
     """
     waiter = wt.Waiter()
     waiter.create_order(order_str)
+    print(waiter.get_order())
+
+def main_predict_order2():
+    """
+    Demonstrates the prediction and processing of an order string using the waiter.
+    """
+    order_str = """
+McCrispy||1||no pickle, dry
+5 large french fries||3||
+2 Big Macs||2||
+Coke||1||
+Chicken Biriani||1||
+    """
+    waiter = wt.Waiter()
+    waiter._process_psv_order(order_str)
     waiter.print_order()
 
 if __name__ == "__main__":
     # Uncomment the function you wish to demonstrate
-    main_transcribe()
-    #main_predict_order()
+    # main_transcribe()
+    main_predict_order()
+    # main_predict_order2()
     # main_output_demo()
