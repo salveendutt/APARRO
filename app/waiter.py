@@ -20,7 +20,7 @@ Please present the customer's order in a clear and structured manner, following 
 - Dish: Name of the dish.
 - Quantity: Number of portions or items ordered.
 - Comment: If not specified - keep it empty. Here should be specific instructions or comments, including drink sizes (e.g., large, medium, small) and other details (e.g., cold, hot, spicy).
-3. Return the order in CSV format, use | as a separator character.
+3. Return the order in CSV format, use | as a separator character. After comment always add new line.
 4. Do not output anything other than CSV output.
 """) 
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +35,16 @@ class Waiter:
         self._unavailable = []
         self._llm = initialize_model(MODEL_PATH, MODEL_FILE, MODEL_TYPE)
 
+    def predict(self, prompt):
+        psv_order = self._llm(prompt, 
+                            max_new_tokens=2048, 
+                            temperature=0.0,
+                            top_k=55, 
+                            top_p=0.9, 
+                            repetition_penalty=1.2).replace("```", "").replace(".", "")
+        psv_order = textwrap.dedent(psv_order)
+        return psv_order
+    
     def create_order(self, order: str):
         """
         Processes a customer's order and returns a confirmed order and items not on the menu.
@@ -47,16 +57,27 @@ class Waiter:
         """
         # Stage 1, Creating Prompt for the Model
         prompt = create_prompt(order)
+        print(order)
         # Stage 2, Running the model
         logging.info("Predicting...")
-        psv_order = self._llm(prompt, max_new_tokens=2048, temperature=0.0,
-                         top_k=55, top_p=0.9, repetition_penalty=1.2).replace("```", "").replace(".", "")
-        psv_order = textwrap.dedent(psv_order)
+        psv_order = self.predict(prompt)
         logging.info("Model output: %s", psv_order)
         # Stage 3, Processing the Order
-        self._process_psv_order(psv_order)
+        self.process_psv_order(psv_order)
 
-    def _process_psv_order(self, order: str):
+    def process_psv_order(self, order: str):
+        """
+        Processes a pipe-separated values (PSV) order string to identify valid food items.
+
+        This function iterates over each line of the input `order` string, which is expected to be in PSV format (each line contains fields separated by '|'). It splits each line into dish, quantity, and comment. Then, it uses fuzzy matching to find the most similar item from a predefined menu (`mn.mcdonalds_menu`). If the similarity score is 90% or higher, the item is considered a valid menu item and is added to the `_ordered` list with its details. Otherwise, it is added to the `_unavailable` list.
+
+        Args:
+            order (str): A string representing the order, with each line in the format of 'dish|quantity|comment'.
+
+        Attributes Modified:
+            self._ordered (list): A list of dictionaries where each dictionary contains 'dish', 'comment', and 'quantity' for confirmed menu items.
+            self._unavailable (list): A list of dishes that are not found in the menu or have a similarity score below 90.
+        """
         for line in order.split('\n'):
             if '|' not in line:
                 continue
