@@ -18,7 +18,8 @@ def main():
         .with_waiter()
         .build()
     )
-    restaurant.take_order()
+    result = restaurant.take_order()
+    print(result)
 
 if __name__ == "__main__":
     main()

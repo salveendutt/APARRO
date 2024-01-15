@@ -43,7 +43,7 @@ Chicken Biriani||1||
 
 if __name__ == "__main__":
     # Uncomment the function you wish to demonstrate
-    # main_transcribe()
-    main_predict_order()
+    main_transcribe()
+    # main_predict_order()
     # main_predict_order2()
     # main_output_demo()

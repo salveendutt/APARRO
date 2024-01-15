@@ -10,12 +10,14 @@ import pyaudio
 import soundfile as sf
 from faster_whisper import WhisperModel
 import keyboard
+import time
 
-COMPUTE_TYPE = "float16"
+COMPUTE_TYPE_GPU = "float16"
+COMPUTE_TYPE_CPU = "float32"
 # Whisper is able to handle only up to 30 seconds, so we need to cut the string
 # after some period of time the same way as in live transcibe. Or is it handled in transcribe_audio?
-
 # pylint: disable=R0903
+
 class Transcriber:
     """
     This class is responsible for transcribing audio input using the Whisper model.
@@ -31,7 +33,10 @@ class Transcriber:
         device_type (str): Type of device to use for the Whisper model.
         """
         try:
-            self._model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE)
+            if device_type == "cpu":
+                self._model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE_CPU)
+            else:
+                self._model = WhisperModel(model_name, device=device_type, compute_type=COMPUTE_TYPE_GPU)
         except Exception as e:
             raise RuntimeError("Error initializing WhisperModel") from e
 
@@ -126,7 +131,10 @@ class Transcriber:
         Returns:
         str: The transcribed text.
         """
+        t0 = time.time()
         self._transcription_done.wait()
+        t1 = time.time()
+        print(f"Transcription took {t1 - t0} seconds")
         return self._predicted_text
 
     def _transcribe_audio(self, audio_buffer) -> str:
