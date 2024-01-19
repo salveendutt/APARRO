@@ -20,7 +20,7 @@ Please present the customer's order in a clear and structured manner, following 
 - Dish: Name of the dish.
 - Quantity: Number of portions or items ordered.
 - Comment: If not specified - keep it empty. Here should be specific instructions or comments, including drink sizes (e.g., large, medium, small) and other details (e.g., cold, hot, spicy).
-3. Return the order in CSV format, use | as a separator character. After comment always add new line.
+3. Return the order in CSV format, use | as a separator character. After comment always add new line. First line always header, starting from second line return what was ordered in format discussed before.
 4. Do not output anything other than CSV output.
 """) 
 logging.basicConfig(level=logging.INFO)
