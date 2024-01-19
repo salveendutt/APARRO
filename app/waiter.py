@@ -79,7 +79,7 @@ class Waiter:
             self._unavailable (list): A list of dishes that are not found in the menu or have a similarity score below 90.
         """
         for line in order.split('\n'):
-            if '|' not in line:
+            if '|' not in line and 'Dish' not in line and '---' not in line:
                 continue
             if not line.strip():
                 continue
@@ -94,6 +94,28 @@ class Waiter:
                 self._ordered.append(confirmed_item)
             else:
                 self._unavailable.append(dish)
+        
+    def read_psv_order(self, order: str):
+        """
+        Processes a pipe-separated values (PSV) order string to identify valid food items.
+
+        This function iterates over each line of the input `order` string, which is expected to be in PSV format (each line contains fields separated by '|'). It splits each line into dish, quantity, and comment. Then, it uses fuzzy matching to find the most similar item from a predefined menu (`mn.mcdonalds_menu`). If the similarity score is 90% or higher, the item is considered a valid menu item and is added to the `_ordered` list with its details. Otherwise, it is added to the `_unavailable` list.
+
+        Args:
+            order (str): A string representing the order, with each line in the format of 'dish|quantity|comment'.
+
+        Attributes Modified:
+            self._ordered (list): A list of dictionaries where each dictionary contains 'dish', 'comment', and 'quantity' for confirmed menu items.
+            self._unavailable (list): A list of dishes that are not found in the menu or have a similarity score below 90.
+        """
+        for line in order.split('\n'):
+            if '|' not in line and 'Dish' not in line and '---' not in line:
+                continue
+            if not line.strip():
+                continue
+            food_item = line.split('|')
+            dish, quantity, comment = food_item
+
                 
     def get_order(self):
         """

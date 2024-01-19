@@ -1,6 +1,6 @@
 User,Prompt
 "A classic Big Mac with extra pickles and a large Coca-Cola.","{'dish': 'Big Mac', 'quantity': 1, 'comment': 'extra pickles'}, {'dish': 'Coca-Cola', 'quantity': 1, 'comment': 'Large'}"
-"Crispy Chicken Sandwich, no lettuce, and a medium Sprite.","{'dish': 'Crispy Chicken Sandwich', 'quantity': 1, 'comment': 'no lettuce'}, {'dish': 'Sprite', 'quantity': 1, 'comment': 'Medium'}"
+"Give me Crispy Chicken Sandwich, no lettuce, and a medium Sprite please.","{'dish': 'Crispy Chicken Sandwich', 'quantity': 1, 'comment': 'no lettuce'}, {'dish': 'Sprite', 'quantity': 1, 'comment': 'Medium'}"
 "Quarter Pounder with Cheese, add bacon, and a small Fanta.","{'dish': 'Quarter Pounder with Cheese', 'quantity': 1, 'comment': 'add bacon'}, {'dish': 'Fanta', 'quantity': 1, 'comment': 'Small'}"
 "A McFlurry with M&M's and a mixed salad.","{'dish': 'McFlurry', 'quantity': 1, 'comment': 'M&Ms'}, {'dish': 'Mixed Salad', 'quantity': 1, 'comment': ''}"
 "A classic McChicken and a small Vanilla Shake.","{'dish': 'McChicken', 'quantity': 1, 'comment': ''}, {'dish': 'Vanilla Shake', 'quantity': 1, 'comment': 'Small'}"
