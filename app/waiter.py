@@ -4,11 +4,11 @@ It uses a language model to interpret the orders and matches them against a menu
 """
 import logging
 import textwrap
-
 from ctransformers import AutoConfig, AutoModelForCausalLM
 from thefuzz import process
 import menu as mn
-
+# MODEL_PATH = 'TheBloke/Mistral-7B-Instruct-v0.2-GGUF'
+# MODEL_FILE = "mistral-7b-instruct-v0.2.Q5_K_M.gguf"
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
@@ -17,13 +17,13 @@ Welcome to our restaurant order processing service! Before proceeding, carefully
 Please present the customer's order in a clear and structured manner, following these instructions:
 1. Thoroughly analyze the customer's order, paying attention to details and potential modifications. If the customer didn't mention any items, return empty string.
 2. For each item return in CSV format with pipeline separator "|" the following details of each food item:
-- Dish: Name of the dish.
+- Dish: Name of the dish, or a drink.
 - Quantity: Number of ordered items (or portions).
-- Comment: If not specified - keep it empty! Here should be specific instructions or comments, including drink sizes and other details food related details.
-3. Make sure to return in CSV, use | as a separator character. First line always header which looks like this:
+- Comment: If not specified - ALWAYS keep it empty! All sizes of dishes or drinks should be ONLY in this column. Also here can be specificaions of food, like spicy, sauces and etc.
+3. Make sure to return the order in CSV format, use | as a separator character. First line always header which looks like this:
 dish|quantity|comment
 , starting from second line return what was ordered in format discussed before.
-4. First column are dishes, then quantity and then comment.  After comment always add new line.
+4. First column is dish, then quantity and then comment.  After comment always add new line.
 5. Do not output anything other than CSV output.
 Notes: Make sure to keep in the second column ONLY QUANTITY. Do not put comments anywhere other than the thirs column. 
 Drinks are ALWAYS a dish. Size of a drink or size of a dish should be ALWAYS in comment.
@@ -44,8 +44,8 @@ class Waiter:
         psv_order = self._llm(prompt, 
                             max_new_tokens=2048, 
                             temperature=0.0,
-                            top_k=55, 
-                            top_p=0.9, 
+                            # top_k=10, 
+                            # top_p=0.1, 
                             repetition_penalty=1.2).replace("```", "").replace(".", "")
         psv_order = textwrap.dedent(psv_order)
         return psv_order
@@ -84,7 +84,11 @@ class Waiter:
             self._unavailable (list): A list of dishes that are not found in the menu or have a similarity score below 90.
         """
         for line in order.split('\n'):
-            if '|' not in line and 'Dish' not in line and '---' not in line:
+            if 'dish' in line:
+                continue
+            if line.count('|') != 2:
+                continue
+            if '---' in line:
                 continue
             if not line.strip():
                 continue
@@ -99,27 +103,6 @@ class Waiter:
                 self._ordered.append(confirmed_item)
             else:
                 self._unavailable.append(dish)
-        
-    def read_psv_order(self, order: str):
-        """
-        Processes a pipe-separated values (PSV) order string to identify valid food items.
-
-        This function iterates over each line of the input `order` string, which is expected to be in PSV format (each line contains fields separated by '|'). It splits each line into dish, quantity, and comment. Then, it uses fuzzy matching to find the most similar item from a predefined menu (`mn.mcdonalds_menu`). If the similarity score is 90% or higher, the item is considered a valid menu item and is added to the `_ordered` list with its details. Otherwise, it is added to the `_unavailable` list.
-
-        Args:
-            order (str): A string representing the order, with each line in the format of 'dish|quantity|comment'.
-
-        Attributes Modified:
-            self._ordered (list): A list of dictionaries where each dictionary contains 'dish', 'comment', and 'quantity' for confirmed menu items.
-            self._unavailable (list): A list of dishes that are not found in the menu or have a similarity score below 90.
-        """
-        for line in order.split('\n'):
-            if '|' not in line and 'Dish' not in line and '---' not in line:
-                continue
-            if not line.strip():
-                continue
-            food_item = line.split('|')
-            dish, quantity, comment = food_item
 
                 
     def get_order(self):
@@ -163,8 +146,7 @@ def create_prompt(order: str, initial_prompt=INITIAL_PROMPT):
     prompt = textwrap.dedent(f"""
     {initial_prompt}
     ```{order}```
-    CSV order with | separator:
-    """)
+    CSV order with | separator:""")
     return prompt.strip()
 
 def initialize_model(model_path_or_repo_id, model_file, model_type):
@@ -175,7 +157,7 @@ def initialize_model(model_path_or_repo_id, model_file, model_type):
     AutoModelForCausalLM: The initialized large language model.
     """
     try:
-        config = AutoConfig.from_pretrained("TheBloke/Mistral-7B-v0.1-GGUF")
+        config = AutoConfig.from_pretrained(MODEL_PATH)
         config.config.max_new_tokens = 2560
         config.config.context_length = 4096
         return AutoModelForCausalLM.from_pretrained(model_path_or_repo_id,

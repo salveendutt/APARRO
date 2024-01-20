@@ -6,7 +6,13 @@ sys.path.append('../app')
 from restaurant import Restaurant as rst
 from transcriber import Transcriber
 
-tr = Transcriber(model_name="medium.en", device_type="cuda")
+# tr = Transcriber(model_name="medium.en", device_type="cpu")
+restaurant = (
+    rst.builder()
+    .with_transcriber(model_name="medium.en", device_type="cpu")
+    .with_waiter()
+    .build()
+)
 
 @csrf_exempt
 def take_order(request):
@@ -15,17 +21,11 @@ def take_order(request):
         audio_file = request.FILES.get('audio_data')
 
         # Create the restaurant object
-        restaurant = (
-            rst.builder()
-            .with_transcriber(model_name="medium.en", device_type="cuda")
-            .with_waiter()
-            .build()
-        )
 
         # Use the transcriber to get the order text
         order_text = restaurant._transcriber._transcribe_audio(audio_file)
         # Process the order
-        order_res = restaurant._waiter.create_order(order_text)
+        restaurant._waiter.create_order(order_text)
         order_result = restaurant._waiter.get_order()
 
         return JsonResponse({'order': order_result})
@@ -36,14 +36,14 @@ def pause_recording(request):
     if request.method == 'POST':
         # Call pause method on your Transcriber instance
         # Assuming you have a global or accessible instance of Transcriber
-        tr._pause_recording()
+        restaurant._transcriber._pause_recording()
         return JsonResponse({'status': 'paused'})
 
 @csrf_exempt
 def resume_recording(request):
     if request.method == 'POST':
         # Call resume method on your Transcriber instance
-        tr._resume_recording()
+        restaurant._transcriber._resume_recording()
         return JsonResponse({'status': 'resumed'})
 
 
