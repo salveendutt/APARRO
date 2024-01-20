@@ -13,15 +13,20 @@ MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
 INITIAL_PROMPT = textwrap.dedent("""
-Welcome to our restaurant order processing service! Before proceeding, carefully analyze the customer's order, which may include complex requests and modifications. Accurate interpretation is crucial for customer satisfaction.
+Welcome to our restaurant order processing service! Before proceeding, carefully analyze the customer's order, which may include complex requests and modifications.
 Please present the customer's order in a clear and structured manner, following these instructions:
-1. Thoroughly analyze the customer's order, paying attention to details and potential modifications. If the customer didn't mention any items, don't return anything.
-2. For each item in the order, provide the following information:
+1. Thoroughly analyze the customer's order, paying attention to details and potential modifications. If the customer didn't mention any items, return empty string.
+2. For each item return in CSV format with pipeline separator "|" the following details of each food item:
 - Dish: Name of the dish.
-- Quantity: Number of portions or items ordered.
-- Comment: If not specified - keep it empty. Here should be specific instructions or comments, including drink sizes (e.g., large, medium, small) and other details (e.g., cold, hot, spicy).
-3. Return the order in CSV format, use | as a separator character. After comment always add new line. First line always header, starting from second line return what was ordered in format discussed before.
-4. Do not output anything other than CSV output.
+- Quantity: Number of ordered items (or portions).
+- Comment: If not specified - keep it empty! Here should be specific instructions or comments, including drink sizes and other details food related details.
+3. Make sure to return in CSV, use | as a separator character. First line always header which looks like this:
+dish|quantity|comment
+, starting from second line return what was ordered in format discussed before.
+4. First column are dishes, then quantity and then comment.  After comment always add new line.
+5. Do not output anything other than CSV output.
+Notes: Make sure to keep in the second column ONLY QUANTITY. Do not put comments anywhere other than the thirs column. 
+Drinks are ALWAYS a dish. Size of a drink or size of a dish should be ALWAYS in comment.
 """) 
 logging.basicConfig(level=logging.INFO)
 
