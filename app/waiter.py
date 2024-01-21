@@ -12,13 +12,14 @@ import menu as mn
 MODEL_PATH = "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
 MODEL_FILE = "mistral-7b-instruct-v0.1.Q5_K_M.gguf"
 MODEL_TYPE = "mistral"
+# If the portion is not specified explicitly, make it equal to 1. Even if the food item sounds like it's multiple of them (cream cookies) the output should still be 1
 INITIAL_PROMPT = textwrap.dedent("""
 Welcome to our restaurant order processing service! Before proceeding, carefully analyze the customer's order, which may include complex requests and modifications.
 Please present the customer's order in a clear and structured manner, following these instructions:
 1. Thoroughly analyze the customer's order, paying attention to details and potential modifications. If the customer didn't mention any items, return empty string.
 2. For each item return in CSV format with pipeline separator "|" the following details of each food item:
 - Dish: Name of the dish, or a drink.
-- Quantity: Number of ordered items (or portions).
+- Quantity: Number of ordered items (or portions). If not specified explicitly how many portions is ordered ALWAYS assign one, even if order suggests its multiple like some french fries or cream cookies should both have quantity as 1, unless customer specified otherwise. 
 - Comment: If not specified - ALWAYS keep it empty! All sizes of dishes or drinks should be ONLY in this column. Also here can be specificaions of food, like spicy, sauces and etc.
 3. Make sure to return the order in CSV format, use | as a separator character. First line always header which looks like this:
 dish|quantity|comment
